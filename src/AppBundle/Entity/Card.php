@@ -42,26 +42,6 @@ class Card {
     /**
      * @var integer
      */
-    private $threat;
-    /**
-     * @var integer
-     */
-    private $willpower;
-    /**
-     * @var integer
-     */
-    private $attack;
-    /**
-     * @var integer
-     */
-    private $defense;
-    /**
-     * @var integer
-     */
-    private $health;
-    /**
-     * @var integer
-     */
     private $victory;
     /**
      * @var integer
@@ -70,7 +50,31 @@ class Card {
     /**
      * @var integer
      */
+    private $willpower;
+    /**
+     * @var integer
+     */    
+    private $threat;
+    /**
+     * @var integer
+     */
+    private $attack;
+    /**
+     * @var integer
+     */
+    private $health;
+    /**
+     * @var integer
+     */
     private $deckLimit;
+    /**
+     * @var integer
+     */
+    private $rarity;
+    /**
+     * @var integer
+     */
+    private $level;  
     /**
      * @var string
      */
@@ -78,7 +82,7 @@ class Card {
     /**
      * @var string
      */
-    private $octgnid;
+    private $uuid;
     /**
      * @var \DateTime
      */
@@ -297,116 +301,6 @@ class Card {
     }
 
     /**
-     * Set threat
-     *
-     * @param integer $threat
-     *
-     * @return Card
-     */
-    public function setThreat($threat) {
-        $this->threat = $threat;
-
-        return $this;
-    }
-
-    /**
-     * Get threat
-     *
-     * @return integer
-     */
-    public function getThreat() {
-        return $this->threat;
-    }
-
-    /**
-     * Set willpower
-     *
-     * @param integer $willpower
-     *
-     * @return Card
-     */
-    public function setWillpower($willpower) {
-        $this->willpower = $willpower;
-
-        return $this;
-    }
-
-    /**
-     * Get willpower
-     *
-     * @return integer
-     */
-    public function getWillpower() {
-        return $this->willpower;
-    }
-
-    /**
-     * Set attack
-     *
-     * @param integer $attack
-     *
-     * @return Card
-     */
-    public function setAttack($attack) {
-        $this->attack = $attack;
-
-        return $this;
-    }
-
-    /**
-     * Get attack
-     *
-     * @return integer
-     */
-    public function getAttack() {
-        return $this->attack;
-    }
-
-    /**
-     * Set defense
-     *
-     * @param integer $defense
-     *
-     * @return Card
-     */
-    public function setDefense($defense) {
-        $this->defense = $defense;
-
-        return $this;
-    }
-
-    /**
-     * Get defense
-     *
-     * @return integer
-     */
-    public function getDefense() {
-        return $this->defense;
-    }
-
-    /**
-     * Set health
-     *
-     * @param integer $health
-     *
-     * @return Card
-     */
-    public function setHealth($health) {
-        $this->health = $health;
-
-        return $this;
-    }
-
-    /**
-     * Get health
-     *
-     * @return integer
-     */
-    public function getHealth() {
-        return $this->health;
-    }
-
-    /**
      * Set victory
      *
      * @param integer $victory
@@ -446,8 +340,96 @@ class Card {
      *
      * @return integer
      */
-    public function getQuantity() {
+    public function getWuantity() {
         return $this->quantity;
+    }
+
+    /**
+     * Set willpower
+     *
+     * @param integer $willpower
+     *
+     * @return Card
+     */
+    public function setWillpower($willpower) {
+        $this->willpower = $willpower;
+
+        return $this;
+    }
+
+    /**
+     * Get willpower
+     *
+     * @return integer
+     */
+    public function getWillpower() {
+        return $this->willpower;
+    }
+
+    /**
+     * Set threat
+     *
+     * @param integer $threat
+     *
+     * @return Card
+     */
+    public function setThreat($threat) {
+        $this->threat = $threat;
+
+        return $this;
+    }
+
+    /**
+     * Get threat
+     *
+     * @return integer
+     */
+    public function getThreat() {
+        return $this->threat;
+    }
+
+    /**
+     * Set attack
+     *
+     * @param integer $attack
+     *
+     * @return Card
+     */
+    public function setAttack($attack) {
+        $this->attack = $attack;
+
+        return $this;
+    }
+
+    /**
+     * Get attack
+     *
+     * @return integer
+     */
+    public function getAttack() {
+        return $this->attack;
+    }
+
+    /**
+     * Set health
+     *
+     * @param integer $health
+     *
+     * @return Card
+     */
+    public function setHealth($health) {
+        $this->health = $health;
+
+        return $this;
+    }
+
+    /**
+     * Get health
+     *
+     * @return integer
+     */
+    public function getHealth() {
+        return $this->health;
     }
 
     /**
@@ -473,6 +455,50 @@ class Card {
     }
 
     /**
+     * Set rarity
+     *
+     * @param integer $rarity
+     *
+     * @return Card
+     */
+    public function setRarity($rarity) {
+        $this->rarity = $rarity;
+
+        return $this;
+    }
+
+    /**
+     * Get rarity
+     *
+     * @return integer
+     */
+    public function getRarity() {
+        return $this->rarity;
+    }
+
+    /**
+     * Set level
+     *
+     * @param integer $level
+     *
+     * @return Card
+     */
+    public function setLevel($level) {
+        $this->level = $level;
+
+        return $this;
+    }
+
+    /**
+     * Get level
+     *
+     * @return integer
+     */
+    public function getLevel() {
+        return $this->level;
+    }
+
+    /**
      * Set illustrator
      *
      * @param string $illustrator
@@ -495,25 +521,25 @@ class Card {
     }
 
     /**
-     * Set octgnid
+     * Set uuid
      *
-     * @param string $octgnid
+     * @param string $uuid
      *
      * @return Card
      */
-    public function setOctgnid($octgnid) {
-        $this->octgnid = $octgnid;
+    public function setUuid($uuid) {
+        $this->uuid = $uuid;
 
         return $this;
     }
 
     /**
-     * Get octgnid
+     * Get uuid
      *
      * @return string
      */
-    public function getOctgnid() {
-        return $this->octgnid;
+    public function getUuid() {
+        return $this->uuid;
     }
 
     /**

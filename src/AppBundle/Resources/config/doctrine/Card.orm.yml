@@ -83,9 +83,6 @@ AppBundle\Entity\Card:
         attack:
             type: smallint
             nullable: true
-        defense:
-            type: smallint
-            nullable: true
         health:
             type: smallint
             nullable: true
@@ -102,11 +99,17 @@ AppBundle\Entity\Card:
             type: smallint
             nullable: true
             column: deck_limit
+        rarity:
+            type: smallint
+            nullable: false
+        level:
+            type: smallint
+            nullable: false
         illustrator:
             type: string
             length: 255
             nullable: true
-        octgnid:
+        uuid:
             type: string
             nullable: true
         dateCreation:

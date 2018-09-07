@@ -31,15 +31,11 @@ class CardsData {
 		static $displayTextReplacements = [
 			'[willpower]' => '<span class="icon-willpower"></span>',
 			'[attack]' => '<span class="icon-attack"></span>',
-			'[defense]' => '<span class="icon-defense"></span>',
-			'[threat]' => '<span class="icon-threat"></span>',
 			'[spirit]' => '<span class="icon-spirit"></span>',
 			'[leadership]' => '<span class="icon-leadership"></span>',
             '[tactics]' => '<span class="icon-tactics"></span>',
             '[lore]' => '<span class="icon-lore"></span>',
 			'[neutral]' => '<span class="icon-neutral"></span>',
-			'[baggins]' => '<span class="icon-baggins"></span>',
-			'[fellowship]' => '<span class="icon-fellowship"></span>',
 			'[unique]' => '<span class="icon-unique"></span>',
 		];
 
@@ -392,9 +388,6 @@ class CardsData {
                 break;
             case 'willpower':
                 $qb->orderBy('c.willpower', 'DESC');
-                break;
-            case 'defense':
-                $qb->orderBy('c.defense', 'DESC');
                 break;
             case 'health':
                 $qb->orderBy('c.health', 'DESC');

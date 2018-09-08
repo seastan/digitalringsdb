@@ -49,8 +49,8 @@ class DeckValidationHelper {
         $cardsCount = $deck->getSlots()->getDrawDeck()->countCards();
         if ($cardsCount < 30) {
             return 'too_few_cards';
-        } else if ($cardsCount < 50 && !$casualPlay) {
-            return 'invalid_for_tournament_play';
+        } else if ($cardsCount > 30)
+            return 'too_many_cards';
         }
 
         foreach($deck->getSlots()->getCopiesAndDeckLimit() as $cardName => $value) {
@@ -74,6 +74,7 @@ class DeckValidationHelper {
             'too_many_heroes' => "Contains too many heroes",
             'too_few_heroes' => "Contains too few heroes",
             'too_few_cards' => "Contains too few cards",
+            'too_many_cards' => "Contains too many cards",
             'too_many_copies' => "Contains too many copies of a card (by title)",
             'invalid_for_tournament_play' => "Invalid for tournament play for having less than 50 cards",
             'duplicated_unique_heroes' => "More than one hero with the same unique name",

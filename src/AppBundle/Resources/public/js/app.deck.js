@@ -49,9 +49,10 @@
         too_many_heroes: "Contains too many heroes",
         too_few_heroes: "Contains too few heroes",
         too_many_copies: "Contains too many copies of a card (by title)",
-        invalid_for_tournament_play: "Invalid for tournament play for having less than 50 cards",
+        invalid_for_tournament_play: "Invalid for tournament play for not having 30 cards",
         duplicated_unique_heroes: "More than one hero with the same unique name",
         too_few_cards: "Contains too few cards",
+        too_many_cards: "Contains too many cards",
         invalid_cards: "Contains forbidden cards"
     };
 
@@ -372,7 +373,7 @@
         var text = [herocount, herocount == 1 ? ' Hero, ': ' Heroes, ', drawcount, drawcount == 1 ? ' Card': ' Cards' ].join(' ');
         var sizeinfo = $('<div class="deckcardcount">' + text + '</div>');
 
-        if (drawcount < 50 || herocount == 0 || deck.get_hero_deck_size(true) > 3) {
+        if (drawcount != 30 || herocount == 0 || deck.get_hero_deck_size(true) > 3) {
             sizeinfo.addClass('text-danger');
         }
 
@@ -629,12 +630,12 @@
             return 'duplicated_unique_heroes';
         }
 
-        // at least 50 others cards
+        // 30 cards
         var decksize = deck.get_draw_deck_size();
         if (decksize < 30) {
             return 'too_few_cards';
-        } else if (decksize < 50) {
-            return 'invalid_for_tournament_play';
+        } else if (decksize > 30) {
+            return 'too_many_cards';
         }
 
         var keys = _.findKey(deck.get_copies_and_deck_limit(), function(value) {

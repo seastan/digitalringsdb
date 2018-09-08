@@ -112,11 +112,12 @@ class BuilderController extends Controller {
             }
         }
 
-        if ($filetype == "octgn" || ($filetype == "auto" && $origext == "o8d")) {
+/*         if ($filetype == "octgn" || ($filetype == "auto" && $origext == "o8d")) {
             $parse = $this->parseOctgnImport(file_get_contents($filename));
         } else {
             $parse = $this->parseTextImport(file_get_contents($filename));
-        }
+        } */
+        $parse = $this->parseTextImport(file_get_contents($filename));
 
         return $this->forward('AppBundle:Builder:save', [
             'name' => str_replace(".$origext", '', $origname),
@@ -211,18 +212,18 @@ class BuilderController extends Controller {
         $crawler = new Crawler();
         $crawler->addXmlContent($octgn);
 
-        // read octgnid
-        $octgnids = [];
-        $sideoctgnids = [];
+        // read uuid
+        $uuids = [];
+        $sideuuids = [];
 
         $cardcrawler = $crawler->filter('deck > section[name!="Sideboard"] > card');
         foreach ($cardcrawler as $domElement) {
-            $octgnids[$domElement->getAttribute('id')] = intval($domElement->getAttribute('qty'));
+            $uuids[$domElement->getAttribute('id')] = intval($domElement->getAttribute('qty'));
         }
 
         $cardcrawler = $crawler->filter('deck > section[name="Sideboard"] > card');
         foreach ($cardcrawler as $domElement) {
-            $sideoctgnids[$domElement->getAttribute('id')] = intval($domElement->getAttribute('qty'));
+            $sideuuids[$domElement->getAttribute('id')] = intval($domElement->getAttribute('qty'));
         }
 
         // read desc
@@ -233,9 +234,9 @@ class BuilderController extends Controller {
         }
 
         $content = [];
-        foreach ($octgnids as $octgnid => $qty) {
+        foreach ($uuids as $uuid => $qty) {
             /* @var $pack \AppBundle\Entity\Card */
-            $card = $em->getRepository('AppBundle:Card')->findOneBy(['octgnid' => $octgnid]);
+            $card = $em->getRepository('AppBundle:Card')->findOneBy(['uuid' => $uuid]);
 
             if ($card) {
                 $content[$card->getCode()] = $qty;
@@ -243,9 +244,9 @@ class BuilderController extends Controller {
         }
 
         $sidecontent = [];
-        foreach ($sideoctgnids as $octgnid => $qty) {
+        foreach ($sideuuids as $uuid => $qty) {
             /* @var $pack \AppBundle\Entity\Card */
-            $card = $em->getRepository('AppBundle:Card')->findOneBy(['octgnid' => $octgnid]);
+            $card = $em->getRepository('AppBundle:Card')->findOneBy(['uuid' => $uuid]);
 
             if ($card) {
                 $sidecontent[$card->getCode()] = $qty;

@@ -340,7 +340,7 @@ class Card {
      *
      * @return integer
      */
-    public function getWuantity() {
+    public function getQuantity() {
         return $this->quantity;
     }
 
@@ -457,7 +457,7 @@ class Card {
     /**
      * Set rarity
      *
-     * @param integer $rarity
+     * @param string $rarity
      *
      * @return Card
      */
@@ -470,7 +470,7 @@ class Card {
     /**
      * Get rarity
      *
-     * @return integer
+     * @return string
      */
     public function getRarity() {
         return $this->rarity;

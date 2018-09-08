@@ -69,13 +69,13 @@ class ScrapOctgnCardDataCommand extends ContainerAwareCommand {
 
             $cardcrawler = $crawler->filter('set > cards > card');
             foreach ($cardcrawler as $domElement) {
-                $octgnid = $domElement->getAttribute('id');
+                $uuid = $domElement->getAttribute('id');
                 $name = $domElement->getAttribute('name');
 
                 /* @var $card \AppBundle\Entity\Card */
                 $card = $em->getRepository('AppBundle:Card')->findOneBy(['name' => $name, 'pack' => $pack]);
                 if ($card) {
-                    $card->setOctgnid($octgnid);
+                    $card->setUuid($uuid);
 
 
                     //$domCrawler = new Crawler();
@@ -98,11 +98,11 @@ class ScrapOctgnCardDataCommand extends ContainerAwareCommand {
             //dump("Loading cards from $packName");
 
             /*
-            // read octgnid
+            // read uuid
             $cardcrawler = $crawler->filter('deck > section > card');
-            $octgnids = [];
+            $uuids = [];
             foreach ($cardcrawler as $domElement) {
-                $octgnids[$domElement->getAttribute('id')] = intval($domElement->getAttribute('qty'));
+                $uuids[$domElement->getAttribute('id')] = intval($domElement->getAttribute('qty'));
             }
 
             // read desc
@@ -113,9 +113,9 @@ class ScrapOctgnCardDataCommand extends ContainerAwareCommand {
             }
 
             $content = [];
-            foreach ($octgnids as $octgnid => $qty) {
+            foreach ($uuids as $uuid => $qty) {
                 $card = $em->getRepository('AppBundle:Card')->findOneBy([
-                    'octgnid' => $octgnid
+                    'uuid' => $uuid
                 ]);
 
                 if ($card) {

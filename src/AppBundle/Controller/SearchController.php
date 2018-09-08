@@ -35,7 +35,7 @@ class SearchController extends Controller {
         'i' => 'string',
         'k' => 'string',
         'x' => 'string',
-        'r' => 'integer',
+        'r' => 'string',
         'l' => 'integer',
         'e' => 'code',
         's' => 'code',

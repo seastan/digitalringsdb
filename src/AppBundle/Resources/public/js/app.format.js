@@ -56,7 +56,6 @@
 			case 'ally':
 				text += (card.willpower != null ? card.willpower : 'X') + ' <span class="icon icon-willpower" title="Willpower"></span>&#160; ';
 				text += (card.attack != null ? card.attack : 'X') + ' <span class="icon icon-attack" title="Attack"></span>&#160; ';
-				text += (card.defense != null ? card.defense : 'X') + ' <span class="icon icon-defense" title="Defense"></span>&#160; ';
 				text += (card.health != null ? card.health : 'X') + ' <span class="icon icon-health" title="Hit Points"></span>&#160; ';
 				break;
 		}

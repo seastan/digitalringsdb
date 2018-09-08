@@ -23,7 +23,7 @@ AppBundle\Entity\Sphere:
         is_primary:
             type: boolean
             nullable: false
-        octgnid:
+        uuid:
             type: string
             nullable: true
     uniqueConstraints:

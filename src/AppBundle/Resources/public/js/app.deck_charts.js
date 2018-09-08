@@ -5,9 +5,7 @@
         lore: '#51B848',
         tactics: '#ED2E30',
         leadership: '#AD62A5',
-        neutral: '#616161',
-        baggins: '#B39E26',
-        fellowship: '#B56C0C'
+        neutral: '#616161'
     };
 
     function convertHex(hex, opacity) {
@@ -229,11 +227,6 @@
             color: '#13522f',
             y: 0
         }, {
-            name: 'Defense',
-            label: '<span class="icon icon-defense"></span>',
-            color: '#292e5f',
-            y: 0
-        }, {
             name: 'Hit Points',
             label: '<span class="icon icon-health"></span>',
             color: '#c8232a',
@@ -250,9 +243,6 @@
                 }
                 if (typeof card.attack === 'number') {
                     data[1].y += card.attack * count;
-                }
-                if (typeof card.defense === 'number') {
-                    data[2].y += card.defense * count;
                 }
                 if (typeof card.health === 'number') {
                     data[3].y += card.health * count;

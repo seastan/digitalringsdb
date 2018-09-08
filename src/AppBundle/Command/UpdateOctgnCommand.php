@@ -42,14 +42,14 @@ class UpdateOctgnCommand extends ContainerAwareCommand {
 
         foreach ($cards as $card) {
 
-            if ($card->getOctgnid()) {
+            if ($card->getUuid()) {
                 continue;
             }
 
             $key = sprintf("%s (%s)", $card->getName(), $card->getPack()->getName());
 
             if (isset($lookup[$key])) {
-                $card->setOctgnid($lookup[$key]);
+                $card->setUuid($lookup[$key]);
                 $output->writeln("<info>Updating octgn id for $key</info>");
             } else {
                 $output->writeln("<error>Cannot find $key in lookup</error>");
@@ -60,14 +60,14 @@ class UpdateOctgnCommand extends ContainerAwareCommand {
 
         foreach ($factions as $faction) {
 
-            if ($faction->getOctgnid()) {
+            if ($faction->getUuid()) {
                 continue;
             }
 
             $key = sprintf("%s (Core Set)", $faction->getName());
 
             if (isset($lookup[$key])) {
-                $faction->setOctgnid($lookup[$key]);
+                $faction->setUuid($lookup[$key]);
                 $output->writeln("<info>Updating octgn id for $key</info>");
             } else {
                 $output->writeln("<error>Cannot find $key in lookup</error>");

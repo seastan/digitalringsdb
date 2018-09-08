@@ -115,7 +115,7 @@ html, body {
 }
 
 th, td {
-  &.type, &.sphere, &.cost, &.willpower, &.attack, &.defense, &.health {
+  &.type, &.sphere, &.cost, &.willpower, &.attack, &.health {
     text-align: center;
   }
 }
@@ -941,29 +941,6 @@ div.site-slogan {
   }
 }
 
-.ribbon-baggins {
-  @include ribbon(#B39E26, 42px, #E0E0E0, bottom);
-  box-shadow: -1px 0 1px rgba(0,0,0,0.35);
-  margin-left: 5px;
-  color: #FFF;
-  span {
-    line-height: 40px;
-    font-size: 28px;
-  }
-}
-
-.ribbon-fellowship {
-  @include ribbon(#B56C0C, 42px, #E0E0E0, bottom);
-  box-shadow: -1px 0 1px rgba(0,0,0,0.35);
-  margin-left: 5px;
-  color: #FFF;
-  span {
-    line-height: 40px;
-    font-size: 28px;
-  }
-}
-
-
 .title .decklist-name {
   font-family: 'Julius Sans One', sans-serif;
   padding-left: 150px;
@@ -1015,8 +992,6 @@ div.site-slogan {
 @include bg-color(tactics, #c00106, #FFFFFF);
 @include bg-color(spirit, #3380AD, #FFFFFF);
 @include bg-color(lore, #357308, #FFFFFF);
-@include bg-color(baggins, #E3D852);
-@include bg-color(fellowship, #E89521);
 @include bg-color(neutral, #616161);
 
 
@@ -1038,8 +1013,6 @@ div.site-slogan {
 @include fg-color(tactics, #c00106);
 @include fg-color(spirit, #00B1D4);
 @include fg-color(lore, #51B848);
-@include fg-color(baggins, #B39E26);
-@include fg-color(fellowship, #B56C0C);
 @include fg-color(neutral, #616161);
 
 .sphere-selector {
@@ -1420,7 +1393,7 @@ footer a {
     }
 
     td {
-      &.sphere, &.type, &.cost, &.willpower, &.attack, &.defense, &.health {
+      &.sphere, &.type, &.cost, &.willpower, &.attack, &.health {
         display: inline-block;
         float: left;
         border-top: 0;
@@ -1430,7 +1403,7 @@ footer a {
         width: 30px;
       }
 
-      &.cost, &.willpower, &.attack, &.defense, &.health {
+      &.cost, &.willpower, &.attack, &.health {
         white-space: nowrap;
       }
     }

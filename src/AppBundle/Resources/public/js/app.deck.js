@@ -193,12 +193,6 @@
             type_code: 'hero'
         };
 
-        if (primarySpheresOnly) {
-            where.sphere_code = {
-                '$nin': ['baggins', 'fellowship']
-            };
-        }
-
         return deck.get_cards(sort, where);
     };
 
@@ -331,7 +325,7 @@
         }
 
         if (options.sort == 'sphere') {
-            ['leadership', 'lore', 'spirit', 'tactics', 'neutral', 'baggins', 'fellowship'].forEach(function(sphere) {
+            ['leadership', 'lore', 'spirit', 'tactics', 'neutral'].forEach(function(sphere) {
                 deck.update_layout_section(data, sphere, deck.get_layout_data_one_section('sphere_code', sphere, 'sphere_name', true));
             });
         }
@@ -433,7 +427,7 @@
         }
 
         if (options.sort == 'sphere') {
-            ['leadership', 'lore', 'spirit', 'tactics', 'neutral', 'baggins', 'fellowship'].forEach(function(sphere) {
+            ['leadership', 'lore', 'spirit', 'tactics', 'neutral'].forEach(function(sphere) {
                 deck.update_layout_section(data, sphere, deck.get_layout_data_one_section('sphere_code', sphere, 'sphere_name'));
             });
         }
@@ -911,12 +905,6 @@
                                 break;
                             case 'neutral':
                                 color = '#616161';
-                                break;
-                            case 'baggins':
-                                color = '#B39E26';
-                                break;
-                            case 'fellowship':
-                                color = '#B56C0C';
                                 break;
                         }
 

@@ -6,7 +6,6 @@
         b: [add_integer_sf, 'threat', "Threat"],
         o: [add_string_sf,  'cost', "Cost"],
         a: [add_integer_sf, 'attack', "Attack"],
-        d: [add_integer_sf, 'defense', "Defense"],
         w: [add_integer_sf, 'willpower', "Willpower"],
         h: [add_integer_sf, 'health', "Hit Points"],
         e: [add_string_sf,  'pack_code', "Adventure Pack code"],
@@ -19,6 +18,8 @@
         y: [add_integer_sf, 'quantity', "Quantity in pack"],
         f: [add_string_sf,  's_flavor', "Flavor text"],
         i: [add_string_sf,  'illustrator', "Illustrator"],
+        l: [add_integer_sf, 'level', "Level"],
+        r: [add_integer_sf, 'rarity', "Rarity"],
         z: [add_boolean_sf, 'has_errata', "Errata'd"]
     };
 

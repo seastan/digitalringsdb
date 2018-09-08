@@ -168,11 +168,6 @@
             return false;
         }
 
-        // Never suggest cards of these spheres
-        if (card.sphere_code == 'baggins' || card.sphere == 'fellowship') {
-            return false;
-        }
-
         // Check if there is a proper target in the deck that can use the card
         if (!suggestions.deckHasTargetOption(card)) {
             return false;

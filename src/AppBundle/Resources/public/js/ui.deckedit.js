@@ -105,10 +105,6 @@
 
         sphere_codes.splice(sphere_codes.indexOf('neutral'), 1);
         sphere_codes.push('neutral');
-        sphere_codes.splice(sphere_codes.indexOf('baggins'), 1);
-        sphere_codes.push('baggins');
-        sphere_codes.splice(sphere_codes.indexOf('fellowship'), 1);
-        sphere_codes.push('fellowship');
 
         sphere_codes.forEach(function(sphere_code) {
             var example = app.data.cards.find({ 'sphere_code': sphere_code })[0];
@@ -601,7 +597,6 @@
                     '<td class="cost"><%= card.cost %><%= card.threat %> <span class="visible-xs-inline"><% if (card.threat != undefined) { %>T<% } else {%>C<% } %></span></td>',
                     '<td class="willpower"><% if (card.willpower != undefined) { %><%= card.willpower %> <span class="icon-willpower visible-xs-inline"></span><% } %></td>',
                     '<td class="attack"><% if (card.attack != undefined) { %><%= card.attack %> <span class="icon-attack visible-xs-inline"></span><% } %></td>',
-                    '<td class="defense"><% if (card.defense != undefined) { %><%= card.defense %> <span class="icon-defense visible-xs-inline"></span><% } %></td>',
                     '<td class="health"><% if (card.health != undefined) { %><%= card.health %> <span class="icon-health visible-xs-inline"></span><% } %></td>',
                     '</tr>'
                 ].join(''));

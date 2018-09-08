@@ -100,7 +100,7 @@ AppBundle\Entity\Card:
             nullable: true
             column: deck_limit
         rarity:
-            type: smallint
+            type: string
             nullable: false
         level:
             type: smallint

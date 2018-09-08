@@ -22,7 +22,7 @@ class Sphere {
     /**
      * @var string
      */
-    private $octgnid;
+    private $uuid;
     /**
      * @var \Doctrine\Common\Collections\Collection
      */
@@ -111,25 +111,25 @@ class Sphere {
     }
 
     /**
-     * Set octgnid
+     * Set uuid
      *
-     * @param string $octgnid
+     * @param string $uuid
      *
      * @return Sphere
      */
-    public function setOctgnid($octgnid) {
-        $this->octgnid = $octgnid;
+    public function setUuid($uuid) {
+        $this->uuid = $uuid;
 
         return $this;
     }
 
     /**
-     * Get octgnid
+     * Get uuid
      *
      * @return string
      */
-    public function getOctgnid() {
-        return $this->octgnid;
+    public function getUuid() {
+        return $this->uuid;
     }
 
     /**

@@ -49,7 +49,7 @@ class DeckValidationHelper {
         $cardsCount = $deck->getSlots()->getDrawDeck()->countCards();
         if ($cardsCount < 30) {
             return 'too_few_cards';
-        } else if ($cardsCount > 30)
+        } else if ($cardsCount > 30) {
             return 'too_many_cards';
         }
 

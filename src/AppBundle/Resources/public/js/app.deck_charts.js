@@ -245,7 +245,7 @@
                     data[1].y += card.attack * count;
                 }
                 if (typeof card.health === 'number') {
-                    data[3].y += card.health * count;
+                    data[2].y += card.health * count;
                 }
             }
         });

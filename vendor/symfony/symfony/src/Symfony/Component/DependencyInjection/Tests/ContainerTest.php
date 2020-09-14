@@ -11,13 +11,14 @@
 
 namespace Symfony\Component\DependencyInjection\Tests;
 
-use Symfony\Component\DependencyInjection\Scope;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\Exception\InactiveScopeException;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
+use Symfony\Component\DependencyInjection\Scope;
 
-class ContainerTest extends \PHPUnit_Framework_TestCase
+class ContainerTest extends TestCase
 {
     public function testConstructor()
     {
@@ -133,8 +134,8 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     public function testSet()
     {
         $sc = new Container();
-        $sc->set('foo', $foo = new \stdClass());
-        $this->assertEquals($foo, $sc->get('foo'), '->set() sets a service');
+        $sc->set('._. \\o/', $foo = new \stdClass());
+        $this->assertSame($foo, $sc->get('._. \\o/'), '->set() sets a service');
     }
 
     public function testSetWithNullResetTheService()
@@ -176,7 +177,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $c->set('foo', $foo = new \stdClass(), 'foo');
 
         $scoped = $this->getField($c, 'scopedServices');
-        $this->assertTrue(isset($scoped['foo']['foo']), '->set() sets a scoped service');
+        $this->assertArrayHasKey('foo', $scoped['foo'], '->set() sets a scoped service');
         $this->assertSame($foo, $scoped['foo']['foo'], '->set() sets a scoped service');
     }
 
@@ -204,15 +205,15 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     {
         $sc = new ProjectServiceContainer();
         $sc->set('foo', $foo = new \stdClass());
-        $this->assertEquals($foo, $sc->get('foo'), '->get() returns the service for the given id');
-        $this->assertEquals($foo, $sc->get('Foo'), '->get() returns the service for the given id, and converts id to lowercase');
-        $this->assertEquals($sc->__bar, $sc->get('bar'), '->get() returns the service for the given id');
-        $this->assertEquals($sc->__foo_bar, $sc->get('foo_bar'), '->get() returns the service if a get*Method() is defined');
-        $this->assertEquals($sc->__foo_baz, $sc->get('foo.baz'), '->get() returns the service if a get*Method() is defined');
-        $this->assertEquals($sc->__foo_baz, $sc->get('foo\\baz'), '->get() returns the service if a get*Method() is defined');
+        $this->assertSame($foo, $sc->get('foo'), '->get() returns the service for the given id');
+        $this->assertSame($foo, $sc->get('Foo'), '->get() returns the service for the given id, and converts id to lowercase');
+        $this->assertSame($sc->__bar, $sc->get('bar'), '->get() returns the service for the given id');
+        $this->assertSame($sc->__foo_bar, $sc->get('foo_bar'), '->get() returns the service if a get*Method() is defined');
+        $this->assertSame($sc->__foo_baz, $sc->get('foo.baz'), '->get() returns the service if a get*Method() is defined');
+        $this->assertSame($sc->__foo_baz, $sc->get('foo\\baz'), '->get() returns the service if a get*Method() is defined');
 
         $sc->set('bar', $bar = new \stdClass());
-        $this->assertEquals($bar, $sc->get('bar'), '->get() prefers to return a service defined with set() than one defined with a getXXXMethod()');
+        $this->assertSame($bar, $sc->get('bar'), '->get() prefers to return a service defined with set() than one defined with a getXXXMethod()');
 
         try {
             $sc->get('');
@@ -227,7 +228,6 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     {
         $sc = new ProjectServiceContainer();
         $sc->set('foo', $foo = new \stdClass());
-        $sc->set('bar', $foo = new \stdClass());
         $sc->set('baz', $foo = new \stdClass());
 
         try {
@@ -266,6 +266,18 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     {
         $sc = new ProjectServiceContainer();
         $this->assertNull($sc->get('inactive', ContainerInterface::NULL_ON_INVALID_REFERENCE));
+    }
+
+    /**
+     * @expectedException \Symfony\Component\DependencyInjection\Exception\RuntimeException
+     * @expectedExceptionMessage You have requested a synthetic service ("request"). The DIC does not know how to construct this service.
+     */
+    public function testGetSyntheticServiceAlwaysThrows()
+    {
+        require_once __DIR__.'/Fixtures/php/services9.php';
+
+        $container = new \ProjectServiceContainer();
+        $container->get('request', ContainerInterface::NULL_ON_INVALID_REFERENCE);
     }
 
     public function testHas()
@@ -345,14 +357,17 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $container->addScope(new Scope('foo'));
 
         $container->enterScope('foo');
+        $container->set('foo', new \stdClass(), 'foo');
         $scoped1 = $container->get('scoped');
         $scopedFoo1 = $container->get('scoped_foo');
 
         $container->enterScope('foo');
+        $container->set('foo', new \stdClass(), 'foo');
         $scoped2 = $container->get('scoped');
         $scoped3 = $container->get('SCOPED');
         $scopedFoo2 = $container->get('scoped_foo');
 
+        $container->set('foo', null, 'foo');
         $container->leaveScope('foo');
         $scoped4 = $container->get('scoped');
         $scopedFoo3 = $container->get('scoped_foo');
@@ -385,14 +400,14 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $container->set('a', $a, 'bar');
 
         $scoped = $this->getField($container, 'scopedServices');
-        $this->assertTrue(isset($scoped['bar']['a']));
+        $this->assertArrayHasKey('a', $scoped['bar']);
         $this->assertSame($a, $scoped['bar']['a']);
         $this->assertTrue($container->has('a'));
 
         $container->leaveScope('foo');
 
         $scoped = $this->getField($container, 'scopedServices');
-        $this->assertFalse(isset($scoped['bar']));
+        $this->assertArrayNotHasKey('bar', $scoped);
         $this->assertFalse($container->isScopeActive('foo'));
         $this->assertFalse($container->has('a'));
     }
@@ -418,14 +433,14 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $container->set('a', $a, 'foo');
 
         $scoped = $this->getField($container, 'scopedServices');
-        $this->assertTrue(isset($scoped['foo']['a']));
+        $this->assertArrayHasKey('a', $scoped['foo']);
         $this->assertSame($a, $scoped['foo']['a']);
         $this->assertTrue($container->has('a'));
 
         $container->enterScope('foo');
 
         $scoped = $this->getField($container, 'scopedServices');
-        $this->assertFalse(isset($scoped['a']));
+        $this->assertArrayNotHasKey('a', $scoped);
         $this->assertTrue($container->isScopeActive('foo'));
         $this->assertFalse($container->isScopeActive('bar'));
         $this->assertFalse($container->has('a'));
@@ -460,14 +475,14 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $container->set('a', $a, 'bar');
 
         $scoped = $this->getField($container, 'scopedServices');
-        $this->assertTrue(isset($scoped['bar']['a']));
+        $this->assertArrayHasKey('a', $scoped['bar']);
         $this->assertSame($a, $scoped['bar']['a']);
         $this->assertTrue($container->has('a'));
 
         $container->enterScope('bar');
 
         $scoped = $this->getField($container, 'scopedServices');
-        $this->assertFalse(isset($scoped['a']));
+        $this->assertArrayNotHasKey('a', $scoped);
         $this->assertTrue($container->isScopeActive('foo'));
         $this->assertTrue($container->isScopeActive('bar'));
         $this->assertFalse($container->has('a'));
@@ -683,7 +698,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     {
         $class = new \ReflectionClass('Symfony\Component\DependencyInjection\Container');
         $clone = $class->getMethod('__clone');
-        if (PHP_VERSION_ID >= 50400) {
+        if (\PHP_VERSION_ID >= 50400) {
             $this->assertFalse($class->isCloneable());
         }
         $this->assertTrue($clone->isPrivate());
@@ -692,7 +707,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
 class ProjectServiceContainer extends Container
 {
-    public $__bar, $__foo_bar, $__foo_baz;
+    public $__bar;
+    public $__foo_bar;
+    public $__foo_baz;
     public $synchronized;
 
     public function __construct()
@@ -731,6 +748,12 @@ class ProjectServiceContainer extends Container
         }
 
         return $this->services['scoped_bar'] = $this->scopedServices['foo']['scoped_bar'] = new \stdClass();
+    }
+
+    protected function synchronizeFooService()
+    {
+        // Typically get the service to pass it to a setter
+        $this->get('foo');
     }
 
     protected function synchronizeScopedSynchronizedFooService()

@@ -11,10 +11,11 @@
 
 namespace Symfony\Component\Translation\Tests\Loader;
 
-use Symfony\Component\Translation\Loader\XliffFileLoader;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\Translation\Loader\XliffFileLoader;
 
-class XliffFileLoaderTest extends \PHPUnit_Framework_TestCase
+class XliffFileLoaderTest extends TestCase
 {
     public function testLoad()
     {
@@ -46,12 +47,26 @@ class XliffFileLoaderTest extends \PHPUnit_Framework_TestCase
         libxml_use_internal_errors($internalErrors);
     }
 
+    public function testLoadWithExternalEntitiesDisabled()
+    {
+        $disableEntities = libxml_disable_entity_loader(true);
+
+        $loader = new XliffFileLoader();
+        $resource = __DIR__.'/../fixtures/resources.xlf';
+        $catalogue = $loader->load($resource, 'en', 'domain1');
+
+        libxml_disable_entity_loader($disableEntities);
+
+        $this->assertEquals('en', $catalogue->getLocale());
+        $this->assertEquals(array(new FileResource($resource)), $catalogue->getResources());
+    }
+
     public function testLoadWithResname()
     {
         $loader = new XliffFileLoader();
         $catalogue = $loader->load(__DIR__.'/../fixtures/resname.xlf', 'en', 'domain1');
 
-        $this->assertEquals(array('foo' => 'bar', 'bar' => 'baz', 'baz' => 'foo'), $catalogue->all('domain1'));
+        $this->assertEquals(array('foo' => 'bar', 'bar' => 'baz', 'baz' => 'foo', 'qux' => 'qux source'), $catalogue->all('domain1'));
     }
 
     public function testIncompleteResource()
@@ -133,7 +148,14 @@ class XliffFileLoaderTest extends \PHPUnit_Framework_TestCase
     {
         $loader = new XliffFileLoader();
         $resource = __DIR__.'/../fixtures/empty.xlf';
-        $this->setExpectedException('Symfony\Component\Translation\Exception\InvalidResourceException', sprintf('Unable to load "%s":', $resource));
+
+        if (method_exists($this, 'expectException')) {
+            $this->expectException('Symfony\Component\Translation\Exception\InvalidResourceException');
+            $this->expectExceptionMessage(sprintf('Unable to load "%s":', $resource));
+        } else {
+            $this->setExpectedException('Symfony\Component\Translation\Exception\InvalidResourceException', sprintf('Unable to load "%s":', $resource));
+        }
+
         $loader->load($resource, 'en', 'domain1');
     }
 

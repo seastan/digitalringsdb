@@ -11,24 +11,26 @@
 
 namespace Symfony\Component\Security\Http\Firewall;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderAdapter;
 use Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
+use Symfony\Component\Security\Core\Authentication\SimpleFormAuthenticatorInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Core\Exception\InvalidArgumentException;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
-use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
-use Symfony\Component\Security\Core\Authentication\SimpleFormAuthenticatorInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Http\HttpUtils;
 use Symfony\Component\Security\Http\ParameterBagUtils;
 use Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterface;
-use Psr\Log\LoggerInterface;
 
 /**
  * @author Jordi Boggiano <j.boggiano@seld.be>
@@ -39,21 +41,19 @@ class SimpleFormAuthenticationListener extends AbstractAuthenticationListener
     private $csrfTokenManager;
 
     /**
-     * Constructor.
-     *
      * @param TokenStorageInterface                  $tokenStorage          A TokenStorageInterface instance
      * @param AuthenticationManagerInterface         $authenticationManager An AuthenticationManagerInterface instance
      * @param SessionAuthenticationStrategyInterface $sessionStrategy
-     * @param HttpUtils                              $httpUtils             An HttpUtilsInterface instance
+     * @param HttpUtils                              $httpUtils             An HttpUtils instance
      * @param string                                 $providerKey
      * @param AuthenticationSuccessHandlerInterface  $successHandler
      * @param AuthenticationFailureHandlerInterface  $failureHandler
      * @param array                                  $options               An array of options for the processing of a
      *                                                                      successful, or failed authentication attempt
-     * @param LoggerInterface                        $logger                A LoggerInterface instance
-     * @param EventDispatcherInterface               $dispatcher            An EventDispatcherInterface instance
-     * @param CsrfTokenManagerInterface              $csrfTokenManager      A CsrfTokenManagerInterface instance
-     * @param SimpleFormAuthenticatorInterface       $simpleAuthenticator   A SimpleFormAuthenticatorInterface instance
+     * @param LoggerInterface|null                   $logger                A LoggerInterface instance
+     * @param EventDispatcherInterface|null          $dispatcher            An EventDispatcherInterface instance
+     * @param CsrfTokenManagerInterface|null         $csrfTokenManager      A CsrfTokenManagerInterface instance
+     * @param SimpleFormAuthenticatorInterface|null  $simpleAuthenticator   A SimpleFormAuthenticatorInterface instance
      *
      * @throws \InvalidArgumentException In case no simple authenticator is provided
      * @throws InvalidArgumentException  In case an invalid CSRF token manager is passed
@@ -75,7 +75,7 @@ class SimpleFormAuthenticationListener extends AbstractAuthenticationListener
                 throw new \InvalidArgumentException(sprintf('You should only define an option for one of "intention" or "csrf_token_id" for the "%s". Use the "csrf_token_id" as it replaces "intention".', __CLASS__));
             }
 
-            @trigger_error('The "intention" option for the '.__CLASS__.' is deprecated since version 2.8 and will be removed in 3.0. Use the "csrf_token_id" option instead.', E_USER_DEPRECATED);
+            @trigger_error('The "intention" option for the '.__CLASS__.' is deprecated since Symfony 2.8 and will be removed in 3.0. Use the "csrf_token_id" option instead.', E_USER_DEPRECATED);
 
             $options['csrf_token_id'] = $options['intention'];
         }
@@ -120,11 +120,21 @@ class SimpleFormAuthenticationListener extends AbstractAuthenticationListener
         }
 
         if ($this->options['post_only']) {
-            $username = trim(ParameterBagUtils::getParameterBagValue($request->request, $this->options['username_parameter']));
+            $username = ParameterBagUtils::getParameterBagValue($request->request, $this->options['username_parameter']);
             $password = ParameterBagUtils::getParameterBagValue($request->request, $this->options['password_parameter']);
         } else {
-            $username = trim(ParameterBagUtils::getRequestParameterValue($request, $this->options['username_parameter']));
+            $username = ParameterBagUtils::getRequestParameterValue($request, $this->options['username_parameter']);
             $password = ParameterBagUtils::getRequestParameterValue($request, $this->options['password_parameter']);
+        }
+
+        if (!\is_string($username) || (\is_object($username) && !\method_exists($username, '__toString'))) {
+            throw new BadRequestHttpException(sprintf('The key "%s" must be a string, "%s" given.', $this->options['username_parameter'], \gettype($username)));
+        }
+
+        $username = trim($username);
+
+        if (\strlen($username) > Security::MAX_USERNAME_LENGTH) {
+            throw new BadCredentialsException('Invalid username.');
         }
 
         $request->getSession()->set(Security::LAST_USERNAME, $username);

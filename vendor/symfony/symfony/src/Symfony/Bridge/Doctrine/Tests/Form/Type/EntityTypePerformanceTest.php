@@ -11,12 +11,12 @@
 
 namespace Symfony\Bridge\Doctrine\Tests\Form\Type;
 
-use Symfony\Component\Form\Test\FormPerformanceTestCase;
-use Symfony\Bridge\Doctrine\Tests\Fixtures\SingleIntIdEntity;
 use Doctrine\ORM\Tools\SchemaTool;
-use Symfony\Bridge\Doctrine\Test\DoctrineTestHelper;
-use Symfony\Component\Form\Extension\Core\CoreExtension;
 use Symfony\Bridge\Doctrine\Form\DoctrineOrmExtension;
+use Symfony\Bridge\Doctrine\Test\DoctrineTestHelper;
+use Symfony\Bridge\Doctrine\Tests\Fixtures\SingleIntIdEntity;
+use Symfony\Component\Form\Extension\Core\CoreExtension;
+use Symfony\Component\Form\Test\FormPerformanceTestCase;
 
 /**
  * @author Bernhard Schussek <bschussek@gmail.com>
@@ -32,7 +32,7 @@ class EntityTypePerformanceTest extends FormPerformanceTestCase
 
     protected function getExtensions()
     {
-        $manager = $this->getMock('Doctrine\Common\Persistence\ManagerRegistry');
+        $manager = $this->getMockBuilder('Doctrine\Common\Persistence\ManagerRegistry')->getMock();
 
         $manager->expects($this->any())
             ->method('getManager')
@@ -72,7 +72,7 @@ class EntityTypePerformanceTest extends FormPerformanceTestCase
         $ids = range(1, 300);
 
         foreach ($ids as $id) {
-            $name = 65 + chr($id % 57);
+            $name = 65 + (int) \chr($id % 57);
             $this->em->persist(new SingleIntIdEntity($id, $name));
         }
 

@@ -2,6 +2,7 @@
 
 namespace Gedmo\Sortable;
 
+use Doctrine\Common\Comparable;
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\Proxy;
@@ -154,7 +155,7 @@ class SortableListener extends MappedEventSubscriber
      * @param ClassMetadata   $meta
      * @param object          $object
      */
-    private function processInsert(SortableAdapter $ea, array $config, $meta, $object)
+    protected function processInsert(SortableAdapter $ea, array $config, $meta, $object)
     {
         $em = $ea->getObjectManager();
         $uow = $em->getUnitOfWork();
@@ -210,8 +211,7 @@ class SortableListener extends MappedEventSubscriber
 
         // Set new position
         if ($old < 0 || is_null($old)) {
-            $meta->getReflectionProperty($config['position'])->setValue($object, $newPosition);
-            $ea->recomputeSingleObjectChangeSet($uow, $meta, $object);
+            $this->setFieldValue($ea, $object, $config['position'], $old, $newPosition);
         }
     }
 
@@ -223,7 +223,7 @@ class SortableListener extends MappedEventSubscriber
      * @param ClassMetadata   $meta
      * @param object          $object
      */
-    private function processUpdate(SortableAdapter $ea, array $config, $meta, $object)
+    protected function processUpdate(SortableAdapter $ea, array $config, $meta, $object)
     {
         $em = $ea->getObjectManager();
         $uow = $em->getUnitOfWork();
@@ -352,8 +352,7 @@ class SortableListener extends MappedEventSubscriber
         }
 
         // Set new position
-        $meta->getReflectionProperty($config['position'])->setValue($object, $newPosition);
-        $ea->recomputeSingleObjectChangeSet($uow, $meta, $object);
+        $this->setFieldValue($ea, $object, $config['position'], $oldPosition, $newPosition);
     }
 
     /**
@@ -364,7 +363,7 @@ class SortableListener extends MappedEventSubscriber
      * @param ClassMetadata   $meta
      * @param object          $object
      */
-    private function processDeletion(SortableAdapter $ea, array $config, $meta, $object)
+    protected function processDeletion(SortableAdapter $ea, array $config, $meta, $object)
     {
         $position = $meta->getReflectionProperty($config['position'])->getValue($object);
 
@@ -387,7 +386,7 @@ class SortableListener extends MappedEventSubscriber
      * Persists relocations to database.
      * @param SortableAdapter $ea
      */
-    private function persistRelocations(SortableAdapter $ea)
+    protected function persistRelocations(SortableAdapter $ea)
     {
         if (!$this->persistenceNeeded) {
             return;
@@ -414,6 +413,9 @@ class SortableListener extends MappedEventSubscriber
     {
         $ea = $this->getEventAdapter($args);
         $em = $ea->getObjectManager();
+
+        $updatedObjects = [];
+
         foreach ($this->relocations as $hash => $relocation) {
             $config = $this->getConfiguration($em, $relocation['name']);
             foreach ($relocation['deltas'] as $delta) {
@@ -461,18 +463,39 @@ class SortableListener extends MappedEventSubscriber
                                 $matches = $gr === null;
                             } elseif (is_object($gr) && is_object($value) && $gr !== $value) {
                                 // Special case for equal objects but different instances.
-                                $matches = $gr == $value;
+                                // If the object implements Comparable interface we can use its compareTo method
+                                // Otherwise we fallback to normal object comparison
+                                if ($gr instanceof Comparable) {
+                                    $matches = $gr->compareTo($value);
+                                } else {
+                                    $matches = $gr == $value;
+                                }
                             } else {
                                 $matches = $gr === $value;
                             }
                             $value = next($relocation['groups']);
                         }
                         if ($matches) {
-                            $meta->getReflectionProperty($config['position'])->setValue($object, $pos + $delta['delta']);
-                            $ea->setOriginalObjectProperty($uow, $oid, $config['position'], $pos + $delta['delta']);
+                            // We cannot use `$this->setFieldValue()` here, because it will create a change set, that will
+                            // prevent from other relocations being executed on this object.
+                            // We just update the object value and will create the change set later.
+                            if (!isset($updatedObjects[$oid])) {
+                                $updatedObjects[$oid] = array(
+                                    'object' => $object,
+                                    'field' => $config['position'],
+                                    'oldValue' => $pos,
+                                );
+                            }
+                            $updatedObjects[$oid]['newValue'] = $pos + $delta['delta'];
+
+                            $meta->getReflectionProperty($config['position'])->setValue($object, $updatedObjects[$oid]['newValue']);
                         }
                     }
                 }
+            }
+
+            foreach ($updatedObjects as $updateData) {
+                $this->setFieldValue($ea, $updateData['object'], $updateData['field'], $updateData['oldValue'], $updateData['newValue']);
             }
 
             // Clear relocations
@@ -481,7 +504,7 @@ class SortableListener extends MappedEventSubscriber
         }
     }
 
-    private function getHash($groups, array $config)
+    protected function getHash($groups, array $config)
     {
         $data = $config['useObjectClass'];
         foreach ($groups as $group => $val) {
@@ -496,7 +519,7 @@ class SortableListener extends MappedEventSubscriber
         return md5($data);
     }
 
-    private function getMaxPosition(SortableAdapter $ea, $meta, $config, $object, array $groups = array())
+    protected function getMaxPosition(SortableAdapter $ea, $meta, $config, $object, array $groups = array())
     {
         $em = $ea->getObjectManager();
         $uow = $em->getUnitOfWork();
@@ -543,7 +566,7 @@ class SortableListener extends MappedEventSubscriber
      * @param int    $delta   The delta to add to relocated nodes
      * @param array  $exclude Objects to be excluded from relocation
      */
-    private function addRelocation($hash, $class, $groups, $start, $stop, $delta, array $exclude = array())
+    protected function addRelocation($hash, $class, $groups, $start, $stop, $delta, array $exclude = array())
     {
         if (!array_key_exists($hash, $this->relocations)) {
             $this->relocations[$hash] = array('name' => $class, 'groups' => $groups, 'deltas' => array());
@@ -556,6 +579,10 @@ class SortableListener extends MappedEventSubscriber
                     $val['delta'] += $needle['delta'];
                     $val['exclude'] = array_merge($val['exclude'], $needle['exclude']);
                     throw new \Exception("Found delta. No need to add it again.");
+                // For every deletion relocation add newly created object to the list of excludes
+                // otherwise position update queries will run for created objects as well.
+                } elseif (-1 == $val['delta'] && 1 == $needle['delta']) {
+                    $val['exclude'] = array_merge($val['exclude'], $needle['exclude']);
                 }
             }, $newDelta);
             $this->relocations[$hash]['deltas'][] = $newDelta;
@@ -571,7 +598,7 @@ class SortableListener extends MappedEventSubscriber
      *
      * @return array
      */
-    private function getGroups($meta, $config, $object)
+    protected function getGroups($meta, $config, $object)
     {
         $groups = array();
         if (isset($config['groups'])) {

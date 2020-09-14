@@ -11,8 +11,8 @@
 
 namespace Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler;
 
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -57,16 +57,14 @@ class SerializerPass implements CompilerPassInterface
         }
 
         $sortedServices = array();
-        foreach ($services as $serviceId => $tags) {
-            foreach ($tags as $attributes) {
-                $priority = isset($attributes['priority']) ? $attributes['priority'] : 0;
-                $sortedServices[$priority][] = new Reference($serviceId);
-            }
+        foreach ($services as $serviceId => $attributes) {
+            $priority = isset($attributes[0]['priority']) ? $attributes[0]['priority'] : 0;
+            $sortedServices[$priority][] = new Reference($serviceId);
         }
 
         krsort($sortedServices);
 
         // Flatten the array
-        return call_user_func_array('array_merge', $sortedServices);
+        return \call_user_func_array('array_merge', $sortedServices);
     }
 }

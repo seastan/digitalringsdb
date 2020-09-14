@@ -11,14 +11,15 @@
 
 namespace Symfony\Component\Serializer\Tests\Mapping\Loader;
 
-use Symfony\Component\Serializer\Mapping\Loader\XmlFileLoader;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\Mapping\ClassMetadata;
+use Symfony\Component\Serializer\Mapping\Loader\XmlFileLoader;
 use Symfony\Component\Serializer\Tests\Mapping\TestClassMetadataFactory;
 
 /**
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class XmlFileLoaderTest extends \PHPUnit_Framework_TestCase
+class XmlFileLoaderTest extends TestCase
 {
     /**
      * @var XmlFileLoader

@@ -11,16 +11,14 @@
 
 namespace Symfony\Component\Form;
 
-use Symfony\Component\Form\Guess\Guess;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
+use Symfony\Component\Form\Guess\Guess;
 
 class FormTypeGuesserChain implements FormTypeGuesserInterface
 {
     private $guessers = array();
 
     /**
-     * Constructor.
-     *
      * @param FormTypeGuesserInterface[] $guessers Guessers as instances of FormTypeGuesserInterface
      *
      * @throws UnexpectedTypeException if any guesser does not implement FormTypeGuesserInterface

@@ -11,13 +11,13 @@
 
 namespace Symfony\Bundle\WebProfilerBundle\Tests\DependencyInjection;
 
-use Symfony\Bundle\WebProfilerBundle\Tests\TestCase;
 use Symfony\Bundle\WebProfilerBundle\DependencyInjection\WebProfilerExtension;
+use Symfony\Bundle\WebProfilerBundle\Tests\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
+use Symfony\Component\DependencyInjection\Reference;
 
 class WebProfilerExtensionTest extends TestCase
 {
@@ -45,13 +45,13 @@ class WebProfilerExtensionTest extends TestCase
     {
         parent::setUp();
 
-        $this->kernel = $this->getMock('Symfony\\Component\\HttpKernel\\KernelInterface');
+        $this->kernel = $this->getMockBuilder('Symfony\\Component\\HttpKernel\\KernelInterface')->getMock();
 
         $this->container = new ContainerBuilder();
         $this->container->register('router', $this->getMockClass('Symfony\\Component\\Routing\\RouterInterface'));
-        $this->container->register('twig', 'Twig_Environment');
-        $this->container->register('twig_loader', 'Twig_Loader_Array')->addArgument(array());
-        $this->container->register('twig', 'Twig_Environment')->addArgument(new Reference('twig_loader'));
+        $this->container->register('twig', 'Twig\Environment');
+        $this->container->register('twig_loader', 'Twig\Loader\ArrayLoader')->addArgument(array());
+        $this->container->register('twig', 'Twig\Environment')->addArgument(new Reference('twig_loader'));
         $this->container->setParameter('kernel.bundles', array());
         $this->container->setParameter('kernel.cache_dir', __DIR__);
         $this->container->setParameter('kernel.debug', false);

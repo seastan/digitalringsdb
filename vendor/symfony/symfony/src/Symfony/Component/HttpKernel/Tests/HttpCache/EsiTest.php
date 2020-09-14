@@ -11,11 +11,12 @@
 
 namespace Symfony\Component\HttpKernel\Tests\HttpCache;
 
-use Symfony\Component\HttpKernel\HttpCache\Esi;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\HttpCache\Esi;
 
-class EsiTest extends \PHPUnit_Framework_TestCase
+class EsiTest extends TestCase
 {
     public function testHasSurrogateEsiCapability()
     {
@@ -225,15 +226,15 @@ class EsiTest extends \PHPUnit_Framework_TestCase
 
     protected function getCache($request, $response)
     {
-        $cache = $this->getMock('Symfony\Component\HttpKernel\HttpCache\HttpCache', array('getRequest', 'handle'), array(), '', false);
+        $cache = $this->getMockBuilder('Symfony\Component\HttpKernel\HttpCache\HttpCache')->setMethods(array('getRequest', 'handle'))->disableOriginalConstructor()->getMock();
         $cache->expects($this->any())
               ->method('getRequest')
               ->will($this->returnValue($request))
         ;
-        if (is_array($response)) {
+        if (\is_array($response)) {
             $cache->expects($this->any())
                   ->method('handle')
-                  ->will(call_user_func_array(array($this, 'onConsecutiveCalls'), $response))
+                  ->will(\call_user_func_array(array($this, 'onConsecutiveCalls'), $response))
             ;
         } else {
             $cache->expects($this->any())

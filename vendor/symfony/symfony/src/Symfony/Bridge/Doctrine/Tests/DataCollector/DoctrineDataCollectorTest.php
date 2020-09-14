@@ -12,11 +12,13 @@
 namespace Symfony\Bridge\Doctrine\Tests\DataCollector;
 
 use Doctrine\DBAL\Platforms\MySqlPlatform;
+use Doctrine\DBAL\Version;
+use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\DataCollector\DoctrineDataCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class DoctrineDataCollectorTest extends \PHPUnit_Framework_TestCase
+class DoctrineDataCollectorTest extends TestCase
 {
     public function testCollectConnections()
     {
@@ -119,7 +121,7 @@ class DoctrineDataCollectorTest extends \PHPUnit_Framework_TestCase
 
     public function paramProvider()
     {
-        return array(
+        $tests = array(
             array('some value', array(), 'some value', true),
             array(1, array(), 1, true),
             array(true, array(), true, true),
@@ -128,6 +130,13 @@ class DoctrineDataCollectorTest extends \PHPUnit_Framework_TestCase
             array(fopen(__FILE__, 'r'), array(), 'Resource(stream)', false),
             array(new \SplFileInfo(__FILE__), array(), 'Object(SplFileInfo)', false),
         );
+
+        if (version_compare(Version::VERSION, '2.6', '>=')) {
+            $tests[] = array('this is not a date', array('date'), 'this is not a date', false);
+            $tests[] = array(new \stdClass(), array('date'), 'Object(stdClass)', false);
+        }
+
+        return $tests;
     }
 
     private function createCollector($queries)
@@ -139,20 +148,20 @@ class DoctrineDataCollectorTest extends \PHPUnit_Framework_TestCase
             ->method('getDatabasePlatform')
             ->will($this->returnValue(new MySqlPlatform()));
 
-        $registry = $this->getMock('Doctrine\Common\Persistence\ManagerRegistry');
+        $registry = $this->getMockBuilder('Doctrine\Common\Persistence\ManagerRegistry')->getMock();
         $registry
-                ->expects($this->any())
-                ->method('getConnectionNames')
-                ->will($this->returnValue(array('default' => 'doctrine.dbal.default_connection')));
+            ->expects($this->any())
+            ->method('getConnectionNames')
+            ->will($this->returnValue(array('default' => 'doctrine.dbal.default_connection')));
         $registry
-                ->expects($this->any())
-                ->method('getManagerNames')
-                ->will($this->returnValue(array('default' => 'doctrine.orm.default_entity_manager')));
+            ->expects($this->any())
+            ->method('getManagerNames')
+            ->will($this->returnValue(array('default' => 'doctrine.orm.default_entity_manager')));
         $registry->expects($this->any())
             ->method('getConnection')
             ->will($this->returnValue($connection));
 
-        $logger = $this->getMock('Doctrine\DBAL\Logging\DebugStack');
+        $logger = $this->getMockBuilder('Doctrine\DBAL\Logging\DebugStack')->getMock();
         $logger->queries = $queries;
 
         $collector = new DoctrineDataCollector($registry);

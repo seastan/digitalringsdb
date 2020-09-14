@@ -11,13 +11,14 @@
 
 namespace Symfony\Component\PropertyInfo\Tests\Extractor;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\Type;
 
 /**
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-class ReflectionExtractorTest extends \PHPUnit_Framework_TestCase
+class ReflectionExtractorTest extends TestCase
 {
     /**
      * @var ReflectionExtractor
@@ -31,12 +32,16 @@ class ReflectionExtractorTest extends \PHPUnit_Framework_TestCase
 
     public function testGetProperties()
     {
-        $this->assertEquals(
+        $this->assertSame(
             array(
                 'bal',
                 'parent',
                 'collection',
+                'nestedCollection',
+                'mixedCollection',
                 'B',
+                'Guid',
+                'g',
                 'foo',
                 'foo2',
                 'foo3',
@@ -45,6 +50,8 @@ class ReflectionExtractorTest extends \PHPUnit_Framework_TestCase
                 'files',
                 'a',
                 'DOB',
+                'Id',
+                '123',
                 'c',
                 'd',
                 'e',
@@ -52,6 +59,8 @@ class ReflectionExtractorTest extends \PHPUnit_Framework_TestCase
             ),
             $this->extractor->getProperties('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy')
         );
+
+        $this->assertNull($this->extractor->getProperties('Symfony\Component\PropertyInfo\Tests\Fixtures\NoProperties'));
     }
 
     /**
@@ -72,6 +81,8 @@ class ReflectionExtractorTest extends \PHPUnit_Framework_TestCase
             array('e', null),
             array('f', array(new Type(Type::BUILTIN_TYPE_ARRAY, false, null, true, new Type(Type::BUILTIN_TYPE_INT), new Type(Type::BUILTIN_TYPE_OBJECT, false, 'DateTime')))),
             array('donotexist', null),
+            array('staticGetter', null),
+            array('staticSetter', null),
         );
     }
 
@@ -94,6 +105,26 @@ class ReflectionExtractorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @dataProvider php71TypesProvider
+     * @requires PHP 7.1
+     */
+    public function testExtractPhp71Type($property, array $type = null)
+    {
+        $this->assertEquals($type, $this->extractor->getTypes('Symfony\Component\PropertyInfo\Tests\Fixtures\Php71Dummy', $property, array()));
+    }
+
+    public function php71TypesProvider()
+    {
+        return array(
+            array('foo', array(new Type(Type::BUILTIN_TYPE_ARRAY, true, null, true))),
+            array('buz', array(new Type(Type::BUILTIN_TYPE_NULL))),
+            array('bar', array(new Type(Type::BUILTIN_TYPE_INT, true))),
+            array('baz', array(new Type(Type::BUILTIN_TYPE_ARRAY, false, null, true, new Type(Type::BUILTIN_TYPE_INT), new Type(Type::BUILTIN_TYPE_STRING)))),
+            array('donotexist', null),
+        );
+    }
+
     public function testIsReadable()
     {
         $this->assertFalse($this->extractor->isReadable('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy', 'bar', array()));
@@ -105,6 +136,10 @@ class ReflectionExtractorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->extractor->isReadable('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy', 'd', array()));
         $this->assertFalse($this->extractor->isReadable('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy', 'e', array()));
         $this->assertFalse($this->extractor->isReadable('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy', 'f', array()));
+        $this->assertTrue($this->extractor->isReadable('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy', 'Id', array()));
+        $this->assertTrue($this->extractor->isReadable('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy', 'id', array()));
+        $this->assertTrue($this->extractor->isReadable('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy', 'Guid', array()));
+        $this->assertFalse($this->extractor->isReadable('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy', 'guid', array()));
     }
 
     public function testIsWritable()
@@ -118,5 +153,8 @@ class ReflectionExtractorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->extractor->isWritable('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy', 'd', array()));
         $this->assertTrue($this->extractor->isWritable('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy', 'e', array()));
         $this->assertTrue($this->extractor->isWritable('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy', 'f', array()));
+        $this->assertFalse($this->extractor->isWritable('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy', 'Id', array()));
+        $this->assertTrue($this->extractor->isWritable('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy', 'Guid', array()));
+        $this->assertFalse($this->extractor->isWritable('Symfony\Component\PropertyInfo\Tests\Fixtures\Dummy', 'guid', array()));
     }
 }

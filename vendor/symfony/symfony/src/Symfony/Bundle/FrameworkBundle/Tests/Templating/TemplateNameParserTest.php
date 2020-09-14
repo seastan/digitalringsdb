@@ -11,9 +11,9 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\Templating;
 
-use Symfony\Bundle\FrameworkBundle\Tests\TestCase;
 use Symfony\Bundle\FrameworkBundle\Templating\TemplateNameParser;
 use Symfony\Bundle\FrameworkBundle\Templating\TemplateReference;
+use Symfony\Bundle\FrameworkBundle\Tests\TestCase;
 use Symfony\Component\Templating\TemplateReference as BaseTemplateReference;
 
 class TemplateNameParserTest extends TestCase
@@ -22,12 +22,12 @@ class TemplateNameParserTest extends TestCase
 
     protected function setUp()
     {
-        $kernel = $this->getMock('Symfony\Component\HttpKernel\KernelInterface');
+        $kernel = $this->getMockBuilder('Symfony\Component\HttpKernel\KernelInterface')->getMock();
         $kernel
             ->expects($this->any())
             ->method('getBundle')
             ->will($this->returnCallback(function ($bundle) {
-                if (in_array($bundle, array('SensioFooBundle', 'SensioCmsFooBundle', 'FooBundle'))) {
+                if (\in_array($bundle, array('SensioFooBundle', 'SensioCmsFooBundle', 'FooBundle'))) {
                     return true;
                 }
 
@@ -66,6 +66,12 @@ class TemplateNameParserTest extends TestCase
             array('::index.html.php', '::index.html.php', 'views/index.html.php', new TemplateReference('', '', 'index', 'html', 'php')),
             array('index.html.php', '::index.html.php', 'views/index.html.php', new TemplateReference('', '', 'index', 'html', 'php')),
             array('FooBundle:Post:foo.bar.index.html.php', 'FooBundle:Post:foo.bar.index.html.php', '@FooBundle/Resources/views/Post/foo.bar.index.html.php', new TemplateReference('FooBundle', 'Post', 'foo.bar.index', 'html', 'php')),
+            array('@FooBundle/Resources/views/layout.html.twig', '@FooBundle/Resources/views/layout.html.twig', '@FooBundle/Resources/views/layout.html.twig', new BaseTemplateReference('@FooBundle/Resources/views/layout.html.twig', 'twig')),
+            array('@FooBundle/Foo/layout.html.twig', '@FooBundle/Foo/layout.html.twig', '@FooBundle/Foo/layout.html.twig', new BaseTemplateReference('@FooBundle/Foo/layout.html.twig', 'twig')),
+            array('/path/to/section/index.html.php', '/path/to/section/index.html.php', '/path/to/section/index.html.php', new BaseTemplateReference('/path/to/section/index.html.php', 'php')),
+            array('C:\\path\\to\\section\\name.html.php', 'C:path/to/section/name.html.php', 'C:path/to/section/name.html.php', new BaseTemplateReference('C:path/to/section/name.html.php', 'php')),
+            array('C:\\path\\to\\section\\name:foo.html.php', 'C:path/to/section/name:foo.html.php', 'C:path/to/section/name:foo.html.php', new BaseTemplateReference('C:path/to/section/name:foo.html.php', 'php')),
+            array('\\path\\to\\section\\name.html.php', '/path/to/section/name.html.php', '/path/to/section/name.html.php', new BaseTemplateReference('/path/to/section/name.html.php', 'php')),
             array('/path/to/section/name.php', '/path/to/section/name.php', '/path/to/section/name.php', new BaseTemplateReference('/path/to/section/name.php', 'php')),
             array('name.twig', 'name.twig', 'name.twig', new BaseTemplateReference('name.twig', 'twig')),
             array('name', 'name', 'name', new BaseTemplateReference('name')),

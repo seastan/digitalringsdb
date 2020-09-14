@@ -11,10 +11,10 @@
 
 namespace Symfony\Component\Form;
 
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Exception\BadMethodCallException;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * A builder for creating {@link Form} instances.
@@ -71,11 +71,11 @@ class FormBuilder extends FormConfigBuilder implements \IteratorAggregate, FormB
             return $this;
         }
 
-        if (!is_string($child) && !is_int($child)) {
+        if (!\is_string($child) && !\is_int($child)) {
             throw new UnexpectedTypeException($child, 'string, integer or Symfony\Component\Form\FormBuilderInterface');
         }
 
-        if (null !== $type && !is_string($type) && !$type instanceof FormTypeInterface) {
+        if (null !== $type && !\is_string($type) && !$type instanceof FormTypeInterface) {
             throw new UnexpectedTypeException($type, 'string or Symfony\Component\Form\FormTypeInterface');
         }
 
@@ -186,7 +186,7 @@ class FormBuilder extends FormConfigBuilder implements \IteratorAggregate, FormB
             throw new BadMethodCallException('FormBuilder methods cannot be accessed anymore once the builder is turned into a FormConfigInterface instance.');
         }
 
-        return count($this->children);
+        return \count($this->children);
     }
 
     /**
@@ -231,6 +231,8 @@ class FormBuilder extends FormConfigBuilder implements \IteratorAggregate, FormB
 
     /**
      * {@inheritdoc}
+     *
+     * @return FormBuilderInterface[]
      */
     public function getIterator()
     {
@@ -244,9 +246,9 @@ class FormBuilder extends FormConfigBuilder implements \IteratorAggregate, FormB
     /**
      * Converts an unresolved child into a {@link FormBuilder} instance.
      *
-     * @param string $name The name of the unresolved child.
+     * @param string $name The name of the unresolved child
      *
-     * @return FormBuilder The created instance.
+     * @return self The created instance
      */
     private function resolveChild($name)
     {

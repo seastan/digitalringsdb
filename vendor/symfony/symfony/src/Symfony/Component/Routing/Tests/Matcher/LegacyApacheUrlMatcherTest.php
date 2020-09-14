@@ -11,14 +11,15 @@
 
 namespace Symfony\Component\Routing\Tests\Matcher;
 
-use Symfony\Component\Routing\RouteCollection;
-use Symfony\Component\Routing\RequestContext;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Routing\Matcher\ApacheUrlMatcher;
+use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\RouteCollection;
 
 /**
  * @group legacy
  */
-class LegacyApacheUrlMatcherTest extends \PHPUnit_Framework_TestCase
+class LegacyApacheUrlMatcherTest extends TestCase
 {
     protected $server;
 

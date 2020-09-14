@@ -11,25 +11,26 @@
 
 namespace Symfony\Component\Security\Http\Firewall;
 
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Http\Authorization\AccessDeniedHandlerInterface;
-use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
-use Symfony\Component\Security\Core\Exception\AccountStatusException;
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
-use Symfony\Component\Security\Core\Exception\LogoutException;
-use Symfony\Component\Security\Http\HttpUtils;
-use Symfony\Component\HttpFoundation\Request;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\Exception\AccountStatusException;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
+use Symfony\Component\Security\Core\Exception\LogoutException;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Http\Authorization\AccessDeniedHandlerInterface;
+use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
+use Symfony\Component\Security\Http\HttpUtils;
 
 /**
  * ExceptionListener catches authentication exception and converts them to
@@ -64,8 +65,6 @@ class ExceptionListener
 
     /**
      * Registers a onKernelException listener to take care of security exceptions.
-     *
-     * @param EventDispatcherInterface $dispatcher An EventDispatcherInterface instance
      */
     public function register(EventDispatcherInterface $dispatcher)
     {
@@ -74,8 +73,6 @@ class ExceptionListener
 
     /**
      * Unregisters the dispatcher.
-     *
-     * @param EventDispatcherInterface $dispatcher An EventDispatcherInterface instance
      */
     public function unregister(EventDispatcherInterface $dispatcher)
     {
@@ -84,8 +81,6 @@ class ExceptionListener
 
     /**
      * Handles security related exceptions.
-     *
-     * @param GetResponseForExceptionEvent $event An GetResponseForExceptionEvent instance
      */
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
@@ -170,9 +165,6 @@ class ExceptionListener
     }
 
     /**
-     * @param Request                 $request
-     * @param AuthenticationException $authException
-     *
      * @return Response
      *
      * @throws AuthenticationException
@@ -180,7 +172,7 @@ class ExceptionListener
     private function startAuthentication(Request $request, AuthenticationException $authException)
     {
         if (null === $this->authenticationEntryPoint) {
-            throw $authException;
+            throw new HttpException(Response::HTTP_UNAUTHORIZED, $authException->getMessage(), $authException, array(), $authException->getCode());
         }
 
         if (null !== $this->logger) {
@@ -203,13 +195,10 @@ class ExceptionListener
         return $this->authenticationEntryPoint->start($request, $authException);
     }
 
-    /**
-     * @param Request $request
-     */
     protected function setTargetPath(Request $request)
     {
         // session isn't required when using HTTP basic authentication mechanism for example
-        if ($request->hasSession() && $request->isMethodSafe() && !$request->isXmlHttpRequest()) {
+        if ($request->hasSession() && $request->isMethodSafe(false) && !$request->isXmlHttpRequest()) {
             $request->getSession()->set('_security.'.$this->providerKey.'.target_path', $request->getUri());
         }
     }

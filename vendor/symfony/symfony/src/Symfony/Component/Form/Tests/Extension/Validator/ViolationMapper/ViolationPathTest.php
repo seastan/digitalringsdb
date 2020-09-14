@@ -11,12 +11,13 @@
 
 namespace Symfony\Component\Form\Tests\Extension\Validator\ViolationMapper;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationPath;
 
 /**
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class ViolationPathTest extends \PHPUnit_Framework_TestCase
+class ViolationPathTest extends TestCase
 {
     public function providePaths()
     {
@@ -95,8 +96,8 @@ class ViolationPathTest extends \PHPUnit_Framework_TestCase
         $path = new ViolationPath($string);
 
         $this->assertSame($slicedPath, $path->__toString());
-        $this->assertSame(count($entries), count($path->getElements()));
-        $this->assertSame(count($entries), $path->getLength());
+        $this->assertCount(\count($entries), $path->getElements());
+        $this->assertSame(\count($entries), $path->getLength());
 
         foreach ($entries as $index => $entry) {
             $this->assertEquals($entry[0], $path->getElement($index));

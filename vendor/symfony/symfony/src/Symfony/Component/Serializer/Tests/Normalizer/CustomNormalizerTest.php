@@ -11,11 +11,12 @@
 
 namespace Symfony\Component\Serializer\Tests\Normalizer;
 
-use Symfony\Component\Serializer\Tests\Fixtures\ScalarDummy;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\Normalizer\CustomNormalizer;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Tests\Fixtures\ScalarDummy;
 
-class CustomNormalizerTest extends \PHPUnit_Framework_TestCase
+class CustomNormalizerTest extends TestCase
 {
     /**
      * @var CustomNormalizer
@@ -45,11 +46,11 @@ class CustomNormalizerTest extends \PHPUnit_Framework_TestCase
 
     public function testDeserialize()
     {
-        $obj = $this->normalizer->denormalize('foo', get_class(new ScalarDummy()), 'xml');
+        $obj = $this->normalizer->denormalize('foo', \get_class(new ScalarDummy()), 'xml');
         $this->assertEquals('foo', $obj->xmlFoo);
         $this->assertNull($obj->foo);
 
-        $obj = $this->normalizer->denormalize('foo', get_class(new ScalarDummy()), 'json');
+        $obj = $this->normalizer->denormalize('foo', \get_class(new ScalarDummy()), 'json');
         $this->assertEquals('foo', $obj->foo);
         $this->assertNull($obj->xmlFoo);
     }

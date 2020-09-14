@@ -11,10 +11,10 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Tests\Functional\Bundle\TestBundle\Controller;
 
+use Symfony\Component\DependencyInjection\ContainerAware;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\DependencyInjection\ContainerAware;
 
 class SessionController extends ContainerAware
 {
@@ -42,7 +42,7 @@ class SessionController extends ContainerAware
 
     public function logoutAction(Request $request)
     {
-        $request->getSession('session')->invalidate();
+        $request->getSession()->invalidate();
 
         return new Response('Session cleared.');
     }

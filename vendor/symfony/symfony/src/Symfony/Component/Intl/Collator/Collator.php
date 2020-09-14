@@ -11,8 +11,8 @@
 
 namespace Symfony\Component\Intl\Collator;
 
-use Symfony\Component\Intl\Exception\MethodNotImplementedException;
 use Symfony\Component\Intl\Exception\MethodArgumentValueNotImplementedException;
+use Symfony\Component\Intl\Exception\MethodNotImplementedException;
 use Symfony\Component\Intl\Globals\IntlGlobals;
 use Symfony\Component\Intl\Locale\Locale;
 
@@ -70,9 +70,7 @@ class Collator
     const SORT_STRING = 1;
 
     /**
-     * Constructor.
-     *
-     * @param string $locale The locale code. The only currently supported locale is "en" (or null using the default locale, i.e. "en").
+     * @param string $locale The locale code. The only currently supported locale is "en" (or null using the default locale, i.e. "en")
      *
      * @throws MethodArgumentValueNotImplementedException When $locale different than "en" or null is passed
      */
@@ -86,9 +84,9 @@ class Collator
     /**
      * Static constructor.
      *
-     * @param string $locale The locale code. The only currently supported locale is "en" (or null using the default locale, i.e. "en").
+     * @param string $locale The locale code. The only currently supported locale is "en" (or null using the default locale, i.e. "en")
      *
-     * @return Collator
+     * @return self
      *
      * @throws MethodArgumentValueNotImplementedException When $locale different than "en" or null is passed
      */

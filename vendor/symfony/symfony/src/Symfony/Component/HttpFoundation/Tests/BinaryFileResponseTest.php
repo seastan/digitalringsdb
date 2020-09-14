@@ -34,6 +34,17 @@ class BinaryFileResponseTest extends ResponseTestCase
         $this->assertEquals('inline; filename="README.md"', $response->headers->get('Content-Disposition'));
     }
 
+    public function testConstructWithNonAsciiFilename()
+    {
+        touch(sys_get_temp_dir().'/fööö.html');
+
+        $response = new BinaryFileResponse(sys_get_temp_dir().'/fööö.html', 200, array(), true, 'attachment');
+
+        @unlink(sys_get_temp_dir().'/fööö.html');
+
+        $this->assertSame('fööö.html', $response->getFile()->getFilename());
+    }
+
     /**
      * @expectedException \LogicException
      */
@@ -47,6 +58,25 @@ class BinaryFileResponseTest extends ResponseTestCase
     {
         $response = new BinaryFileResponse(__FILE__);
         $this->assertFalse($response->getContent());
+    }
+
+    public function testSetContentDispositionGeneratesSafeFallbackFilename()
+    {
+        $response = new BinaryFileResponse(__FILE__);
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, 'föö.html');
+
+        $this->assertSame('attachment; filename="f__.html"; filename*=utf-8\'\'f%C3%B6%C3%B6.html', $response->headers->get('Content-Disposition'));
+    }
+
+    public function testSetContentDispositionGeneratesSafeFallbackFilenameForWronglyEncodedFilename()
+    {
+        $response = new BinaryFileResponse(__FILE__);
+
+        $iso88591EncodedFilename = utf8_decode('föö.html');
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $iso88591EncodedFilename);
+
+        // the parameter filename* is invalid in this case (rawurldecode('f%F6%F6') does not provide a UTF-8 string but an ISO-8859-1 encoded one)
+        $this->assertSame('attachment; filename="f__.html"; filename*=utf-8\'\'f%F6%F6.html', $response->headers->get('Content-Disposition'));
     }
 
     /**
@@ -176,6 +206,19 @@ class BinaryFileResponseTest extends ResponseTestCase
         );
     }
 
+    public function testUnpreparedResponseSendsFullFile()
+    {
+        $response = BinaryFileResponse::create(__DIR__.'/File/Fixtures/test.gif', 200);
+
+        $data = file_get_contents(__DIR__.'/File/Fixtures/test.gif');
+
+        $this->expectOutputString($data);
+        $response = clone $response;
+        $response->sendContent();
+
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+
     /**
      * @dataProvider provideInvalidRanges
      */
@@ -192,7 +235,7 @@ class BinaryFileResponseTest extends ResponseTestCase
         $response->sendContent();
 
         $this->assertEquals(416, $response->getStatusCode());
-        #$this->assertEquals('', $response->headers->get('Content-Range'));
+        $this->assertEquals('bytes */35', $response->headers->get('Content-Range'));
     }
 
     public function provideInvalidRanges()

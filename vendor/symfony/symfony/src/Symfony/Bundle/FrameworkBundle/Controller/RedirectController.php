@@ -50,7 +50,7 @@ class RedirectController extends ContainerAware
         }
 
         $attributes = array();
-        if (false === $ignoreAttributes || is_array($ignoreAttributes)) {
+        if (false === $ignoreAttributes || \is_array($ignoreAttributes)) {
             $attributes = $request->attributes->get('_route_params');
             unset($attributes['route'], $attributes['permanent'], $attributes['ignoreAttributes']);
             if ($ignoreAttributes) {
@@ -100,7 +100,7 @@ class RedirectController extends ContainerAware
 
         $qs = $request->getQueryString();
         if ($qs) {
-            if (strpos($path, '?') === false) {
+            if (false === strpos($path, '?')) {
                 $qs = '?'.$qs;
             } else {
                 $qs = '&'.$qs;

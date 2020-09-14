@@ -11,11 +11,11 @@
 
 namespace Symfony\Component\Intl\Data\Generator;
 
+use Symfony\Component\Intl\Data\Bundle\Compiler\GenrbCompiler;
 use Symfony\Component\Intl\Data\Bundle\Reader\BundleReaderInterface;
 use Symfony\Component\Intl\Data\Util\ArrayAccessibleResourceBundle;
 use Symfony\Component\Intl\Data\Util\LocaleScanner;
 use Symfony\Component\Intl\Exception\RuntimeException;
-use Symfony\Component\Intl\Data\Bundle\Compiler\GenrbCompiler;
 
 /**
  * The rule for compiling the language bundle.
@@ -28,8 +28,6 @@ class LanguageDataGenerator extends AbstractDataGenerator
 {
     /**
      * Source: http://www-01.sil.org/iso639-3/codes.asp.
-     *
-     * @var array
      */
     private static $preferredAlpha2ToAlpha3Mapping = array(
         'ak' => 'aka',
@@ -49,6 +47,7 @@ class LanguageDataGenerator extends AbstractDataGenerator
         'fr' => 'fra',
         'gn' => 'grn',
         'hy' => 'hye',
+        'hr' => 'hrv',
         'ik' => 'ipk',
         'is' => 'isl',
         'iu' => 'iku',
@@ -76,6 +75,7 @@ class LanguageDataGenerator extends AbstractDataGenerator
         'sc' => 'srd',
         'sk' => 'slk',
         'sq' => 'sqi',
+        'sr' => 'srp',
         'sw' => 'swa',
         'uz' => 'uzb',
         'yi' => 'yid',
@@ -157,46 +157,37 @@ class LanguageDataGenerator extends AbstractDataGenerator
         return array(
             'Version' => $rootBundle['Version'],
             'Languages' => $this->languageCodes,
-            'Aliases' => $metadataBundle['languageAlias'],
+            'Aliases' => array_map(function (\ResourceBundle $bundle) {
+                return $bundle['replacement'];
+            }, iterator_to_array($metadataBundle['alias']['language'])),
             'Alpha2ToAlpha3' => $this->generateAlpha2ToAlpha3Mapping($metadataBundle),
         );
     }
 
     private function generateAlpha2ToAlpha3Mapping(ArrayAccessibleResourceBundle $metadataBundle)
     {
-        $aliases = $metadataBundle['languageAlias'];
+        $aliases = iterator_to_array($metadataBundle['alias']['language']);
         $alpha2ToAlpha3 = array();
 
         foreach ($aliases as $alias => $language) {
-            if (2 === strlen($language) && 3 === strlen($alias)) {
+            $language = $language['replacement'];
+            if (2 === \strlen($language) && 3 === \strlen($alias)) {
                 if (isset(self::$preferredAlpha2ToAlpha3Mapping[$language])) {
                     // Validate to prevent typos
                     if (!isset($aliases[self::$preferredAlpha2ToAlpha3Mapping[$language]])) {
-                        throw new RuntimeException(
-                            'The statically set three-letter mapping '.
-                            self::$preferredAlpha2ToAlpha3Mapping[$language].' '.
-                            'for the language code '.$language.' seems to be '.
-                            'invalid. Typo?'
-                        );
+                        throw new RuntimeException('The statically set three-letter mapping '.self::$preferredAlpha2ToAlpha3Mapping[$language].' for the language code '.$language.' seems to be invalid. Typo?');
                     }
 
                     $alpha3 = self::$preferredAlpha2ToAlpha3Mapping[$language];
+                    $alpha2 = $aliases[$alpha3]['replacement'];
 
-                    if ($language !== $aliases[$alpha3]) {
-                        throw new RuntimeException(
-                            'The statically set three-letter mapping '.$alpha3.' '.
-                            'for the language code '.$language.' seems to be '.
-                            'an alias for '.$aliases[$alpha3].'. Wrong mapping?'
-                        );
+                    if ($language !== $alpha2) {
+                        throw new RuntimeException('The statically set three-letter mapping '.$alpha3.' for the language code '.$language.' seems to be an alias for '.$alpha2.'. Wrong mapping?');
                     }
 
                     $alpha2ToAlpha3[$language] = $alpha3;
                 } elseif (isset($alpha2ToAlpha3[$language])) {
-                    throw new RuntimeException(
-                        'Multiple three-letter mappings exist for the language '.
-                        'code '.$language.'. Please add one of them to the '.
-                        'property $preferredAlpha2ToAlpha3Mapping.'
-                    );
+                    throw new RuntimeException('Multiple three-letter mappings exist for the language code '.$language.'. Please add one of them to the property $preferredAlpha2ToAlpha3Mapping.');
                 } else {
                     $alpha2ToAlpha3[$language] = $alias;
                 }

@@ -32,8 +32,6 @@ class LdapClient implements LdapClientInterface
     private $connection;
 
     /**
-     * Constructor.
-     *
      * @param string $host
      * @param int    $port
      * @param int    $version
@@ -43,7 +41,7 @@ class LdapClient implements LdapClientInterface
      */
     public function __construct($host = null, $port = 389, $version = 3, $useSsl = false, $useStartTls = false, $optReferrals = false)
     {
-        if (!extension_loaded('ldap')) {
+        if (!\extension_loaded('ldap')) {
             throw new LdapException('The ldap module is needed.');
         }
 
@@ -79,12 +77,21 @@ class LdapClient implements LdapClientInterface
      */
     public function find($dn, $query, $filter = '*')
     {
-        if (!is_array($filter)) {
+        if (!\is_array($filter)) {
             $filter = array($filter);
         }
 
         $search = ldap_search($this->connection, $dn, $query, $filter);
+
+        if (false === $search) {
+            throw new LdapException(ldap_error($this->connection));
+        }
+
         $infos = ldap_get_entries($this->connection, $search);
+
+        if (false === @ldap_free_result($search)) {
+            throw new LdapException(ldap_error($this->connection));
+        }
 
         if (0 === $infos['count']) {
             return;
@@ -102,10 +109,10 @@ class LdapClient implements LdapClientInterface
 
         // Per RFC 4514, leading/trailing spaces should be encoded in DNs, as well as carriage returns.
         if ((int) $flags & LDAP_ESCAPE_DN) {
-            if (!empty($value) && $value[0] === ' ') {
+            if (!empty($value) && ' ' === $value[0]) {
                 $value = '\\20'.substr($value, 1);
             }
-            if (!empty($value) && $value[strlen($value) - 1] === ' ') {
+            if (!empty($value) && ' ' === $value[\strlen($value) - 1]) {
                 $value = substr($value, 0, -1).'\\20';
             }
             $value = str_replace("\r", '\0d', $value);
@@ -129,14 +136,14 @@ class LdapClient implements LdapClientInterface
             ldap_set_option($this->connection, LDAP_OPT_REFERRALS, $this->optReferrals);
 
             if ($this->useStartTls) {
-                ldap_start_tls($this->connection);
+                @ldap_start_tls($this->connection);
             }
         }
     }
 
     private function disconnect()
     {
-        if ($this->connection && is_resource($this->connection)) {
+        if ($this->connection && \is_resource($this->connection)) {
             ldap_unbind($this->connection);
         }
 

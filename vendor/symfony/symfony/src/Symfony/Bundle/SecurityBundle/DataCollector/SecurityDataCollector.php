@@ -11,17 +11,15 @@
 
 namespace Symfony\Bundle\SecurityBundle\DataCollector;
 
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 use Symfony\Component\Security\Core\Role\RoleInterface;
 use Symfony\Component\Security\Http\Logout\LogoutUrlGenerator;
 
 /**
- * SecurityDataCollector.
- *
  * @author Fabien Potencier <fabien@symfony.com>
  */
 class SecurityDataCollector extends DataCollector
@@ -30,13 +28,6 @@ class SecurityDataCollector extends DataCollector
     private $roleHierarchy;
     private $logoutUrlGenerator;
 
-    /**
-     * Constructor.
-     *
-     * @param TokenStorageInterface|null  $tokenStorage
-     * @param RoleHierarchyInterface|null $roleHierarchy
-     * @param LogoutUrlGenerator|null     $logoutUrlGenerator
-     */
     public function __construct(TokenStorageInterface $tokenStorage = null, RoleHierarchyInterface $roleHierarchy = null, LogoutUrlGenerator $logoutUrlGenerator = null)
     {
         $this->tokenStorage = $tokenStorage;
@@ -78,7 +69,7 @@ class SecurityDataCollector extends DataCollector
             if (null !== $this->roleHierarchy) {
                 $allRoles = $this->roleHierarchy->getReachableRoles($assignedRoles);
                 foreach ($allRoles as $role) {
-                    if (!in_array($role, $assignedRoles, true)) {
+                    if (!\in_array($role, $assignedRoles, true)) {
                         $inheritedRoles[] = $role;
                     }
                 }
@@ -96,11 +87,11 @@ class SecurityDataCollector extends DataCollector
             $this->data = array(
                 'enabled' => true,
                 'authenticated' => $token->isAuthenticated(),
-                'token_class' => get_class($token),
+                'token_class' => \get_class($token),
                 'logout_url' => $logoutUrl,
                 'user' => $token->getUsername(),
-                'roles' => array_map(function (RoleInterface $role) { return $role->getRole();}, $assignedRoles),
-                'inherited_roles' => array_map(function (RoleInterface $role) { return $role->getRole(); }, $inheritedRoles),
+                'roles' => array_map(function (RoleInterface $role) { return $role->getRole(); }, $assignedRoles),
+                'inherited_roles' => array_unique(array_map(function (RoleInterface $role) { return $role->getRole(); }, $inheritedRoles)),
                 'supports_role_hierarchy' => null !== $this->roleHierarchy,
             );
         }
@@ -150,7 +141,7 @@ class SecurityDataCollector extends DataCollector
      * Checks if the data contains information about inherited roles. Still the inherited
      * roles can be an empty array.
      *
-     * @return bool true if the profile was contains inherited role information.
+     * @return bool true if the profile was contains inherited role information
      */
     public function supportsRoleHierarchy()
     {
@@ -178,9 +169,9 @@ class SecurityDataCollector extends DataCollector
     }
 
     /**
-     * Get the provider key (i.e. the name of the active firewall).
+     * Get the logout URL.
      *
-     * @return string The provider key
+     * @return string The logout URL
      */
     public function getLogoutUrl()
     {

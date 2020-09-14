@@ -11,12 +11,13 @@
 
 namespace Symfony\Bundle\SecurityBundle\Tests\DependencyInjection;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\DependencyInjection\SecurityExtension;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\SecurityBundle\Tests\DependencyInjection\Fixtures\UserProvider\DummyProvider;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-class SecurityExtensionTest extends \PHPUnit_Framework_TestCase
+class SecurityExtensionTest extends TestCase
 {
     /**
      * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
@@ -116,6 +117,33 @@ class SecurityExtensionTest extends \PHPUnit_Framework_TestCase
         $container->compile();
 
         $this->assertFalse($container->hasDefinition('security.access.role_hierarchy_voter'));
+    }
+
+    public function testGuardHandlerIsPassedStatelessFirewalls()
+    {
+        $container = $this->getRawContainer();
+
+        $container->loadFromExtension('security', array(
+            'providers' => array(
+                'default' => array('id' => 'foo'),
+            ),
+
+            'firewalls' => array(
+                'some_firewall' => array(
+                    'pattern' => '^/admin',
+                    'http_basic' => null,
+                ),
+                'stateless_firewall' => array(
+                    'pattern' => '/.*',
+                    'stateless' => true,
+                    'http_basic' => null,
+                ),
+            ),
+        ));
+
+        $container->compile();
+        $definition = $container->getDefinition('security.authentication.guard_handler');
+        $this->assertSame(array('stateless_firewall'), $definition->getArgument(2));
     }
 
     protected function getRawContainer()

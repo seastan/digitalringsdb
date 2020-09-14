@@ -11,10 +11,11 @@
 
 namespace Symfony\Bundle\SecurityBundle\Tests\DependencyInjection\Security\Factory;
 
-use Symfony\Component\DependencyInjection\Reference;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
 
-class AbstractFactoryTest extends \PHPUnit_Framework_TestCase
+class AbstractFactoryTest extends TestCase
 {
     public function testCreate()
     {

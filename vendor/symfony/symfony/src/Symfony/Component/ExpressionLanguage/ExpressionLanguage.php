@@ -21,9 +21,6 @@ use Symfony\Component\ExpressionLanguage\ParserCache\ParserCacheInterface;
  */
 class ExpressionLanguage
 {
-    /**
-     * @var ParserCacheInterface
-     */
     private $cache;
     private $lexer;
     private $parser;
@@ -63,7 +60,7 @@ class ExpressionLanguage
      * @param Expression|string $expression The expression to compile
      * @param array             $values     An array of values
      *
-     * @return string The result of the evaluation of the expression
+     * @return mixed The result of the evaluation of the expression
      */
     public function evaluate($expression, $values = array())
     {
@@ -88,7 +85,7 @@ class ExpressionLanguage
         $cacheKeyItems = array();
 
         foreach ($names as $nameKey => $name) {
-            $cacheKeyItems[] = is_int($nameKey) ? $name : $nameKey.':'.$name;
+            $cacheKeyItems[] = \is_int($nameKey) ? $name : $nameKey.':'.$name;
         }
 
         $key = $expression.'//'.implode('|', $cacheKeyItems);
@@ -110,10 +107,16 @@ class ExpressionLanguage
      * @param callable $compiler  A callable able to compile the function
      * @param callable $evaluator A callable able to evaluate the function
      *
+     * @throws \LogicException when registering a function after calling evaluate(), compile() or parse()
+     *
      * @see ExpressionFunction
      */
     public function register($name, $compiler, $evaluator)
     {
+        if (null !== $this->parser) {
+            throw new \LogicException('Registering functions after calling evaluate(), compile() or parse() is not supported.');
+        }
+
         $this->functions[$name] = array('compiler' => $compiler, 'evaluator' => $evaluator);
     }
 
@@ -134,7 +137,7 @@ class ExpressionLanguage
         $this->register('constant', function ($constant) {
             return sprintf('constant(%s)', $constant);
         }, function (array $values, $constant) {
-            return constant($constant);
+            return \constant($constant);
         });
     }
 

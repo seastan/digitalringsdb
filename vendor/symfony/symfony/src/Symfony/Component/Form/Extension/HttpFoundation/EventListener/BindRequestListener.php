@@ -11,9 +11,9 @@
 
 namespace Symfony\Component\Form\Extension\HttpFoundation\EventListener;
 
-use Symfony\Component\Form\FormEvents;
-use Symfony\Component\Form\FormEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -42,7 +42,7 @@ class BindRequestListener implements EventSubscriberInterface
             return;
         }
 
-        @trigger_error('The '.__CLASS__.' class is deprecated since version 2.3 and will be removed in 3.0. Pass the Request instance to the \Symfony\Component\Form\Form::handleRequest() method instead.', E_USER_DEPRECATED);
+        @trigger_error('The '.__CLASS__.' class is deprecated since Symfony 2.3 and will be removed in 3.0. Pass the Request instance to the \Symfony\Component\Form\Form::handleRequest() method instead.', E_USER_DEPRECATED);
 
         $name = $form->getConfig()->getName();
         $default = $form->getConfig()->getCompound() ? array() : null;
@@ -69,7 +69,7 @@ class BindRequestListener implements EventSubscriberInterface
                     $files = $request->files->get($name, $default);
                 }
 
-                if (is_array($params) && is_array($files)) {
+                if (\is_array($params) && \is_array($files)) {
                     $data = array_replace_recursive($params, $files);
                 } else {
                     $data = $params ?: $files;

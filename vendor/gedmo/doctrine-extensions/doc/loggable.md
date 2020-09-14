@@ -37,8 +37,8 @@ Content:
 
 ## Setup and autoloading
 
-Read the [documentation](http://github.com/l3pp4rd/DoctrineExtensions/blob/master/doc/annotations.md#em-setup)
-or check the [example code](http://github.com/l3pp4rd/DoctrineExtensions/tree/master/example)
+Read the [documentation](http://github.com/Atlantic18/DoctrineExtensions/blob/master/doc/annotations.md#em-setup)
+or check the [example code](http://github.com/Atlantic18/DoctrineExtensions/tree/master/example)
 on how to setup and use the extensions in most optimized way.
 
 ### Loggable annotations:
@@ -73,7 +73,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @Entity
+ * @ORM\Entity
  * @Gedmo\Loggable
  */
 class Article
@@ -129,7 +129,7 @@ class Article
     private $id;
 
     /**
-     * @ODM\String
+     * @ODM\Field(type="string")
      * @Gedmo\Versioned
      */
     private $title;

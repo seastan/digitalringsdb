@@ -21,9 +21,6 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
  */
 class SerializerExtractor implements PropertyListExtractorInterface
 {
-    /**
-     * @var ClassMetadataFactoryInterface
-     */
     private $classMetadataFactory;
 
     public function __construct(ClassMetadataFactoryInterface $classMetadataFactory)
@@ -36,7 +33,7 @@ class SerializerExtractor implements PropertyListExtractorInterface
      */
     public function getProperties($class, array $context = array())
     {
-        if (!isset($context['serializer_groups']) || !is_array($context['serializer_groups'])) {
+        if (!isset($context['serializer_groups']) || !\is_array($context['serializer_groups'])) {
             return;
         }
 
@@ -48,7 +45,7 @@ class SerializerExtractor implements PropertyListExtractorInterface
         $serializerClassMetadata = $this->classMetadataFactory->getMetadataFor($class);
 
         foreach ($serializerClassMetadata->getAttributesMetadata() as $serializerAttributeMetadata) {
-            if (count(array_intersect($context['serializer_groups'], $serializerAttributeMetadata->getGroups())) > 0) {
+            if (array_intersect($context['serializer_groups'], $serializerAttributeMetadata->getGroups())) {
                 $properties[] = $serializerAttributeMetadata->getName();
             }
         }

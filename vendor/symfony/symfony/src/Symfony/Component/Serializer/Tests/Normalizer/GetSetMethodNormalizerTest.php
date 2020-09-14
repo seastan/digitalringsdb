@@ -12,18 +12,19 @@
 namespace Symfony\Component\Serializer\Tests\Normalizer;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
+use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Tests\Fixtures\CircularReferenceDummy;
-use Symfony\Component\Serializer\Tests\Fixtures\SiblingHolder;
-use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
-use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Tests\Fixtures\GroupDummy;
+use Symfony\Component\Serializer\Tests\Fixtures\SiblingHolder;
 
-class GetSetMethodNormalizerTest extends \PHPUnit_Framework_TestCase
+class GetSetMethodNormalizerTest extends TestCase
 {
     /**
      * @var GetSetMethodNormalizer
@@ -36,7 +37,7 @@ class GetSetMethodNormalizerTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->serializer = $this->getMock(__NAMESPACE__.'\SerializerNormalizer');
+        $this->serializer = $this->getMockBuilder(__NAMESPACE__.'\SerializerNormalizer')->getMock();
         $this->normalizer = new GetSetMethodNormalizer();
         $this->normalizer->setSerializer($this->serializer);
     }
@@ -454,7 +455,7 @@ class GetSetMethodNormalizerTest extends \PHPUnit_Framework_TestCase
             array(
                 array(
                     'bar' => function ($bars) {
-                        return count($bars);
+                        return \count($bars);
                     },
                 ),
                 array(new GetConstructorDummy('baz', '', false), new GetConstructorDummy('quux', '', false)),
@@ -470,7 +471,7 @@ class GetSetMethodNormalizerTest extends \PHPUnit_Framework_TestCase
      */
     public function testUnableToNormalizeObjectAttribute()
     {
-        $serializer = $this->getMock('Symfony\Component\Serializer\SerializerInterface');
+        $serializer = $this->getMockBuilder('Symfony\Component\Serializer\SerializerInterface')->getMock();
         $this->normalizer->setSerializer($serializer);
 
         $obj = new GetSetDummy();
@@ -514,7 +515,7 @@ class GetSetMethodNormalizerTest extends \PHPUnit_Framework_TestCase
         $serializer = new Serializer(array($this->normalizer));
         $this->normalizer->setSerializer($serializer);
         $this->normalizer->setCircularReferenceHandler(function ($obj) {
-            return get_class($obj);
+            return \get_class($obj);
         });
 
         $obj = new CircularReferenceDummy();
@@ -650,6 +651,11 @@ class GetSetDummy
     public static function setStaticObject($object)
     {
         self::$staticObject = $object;
+    }
+
+    protected function getPrivate()
+    {
+        throw new \RuntimeException('Dummy::getPrivate() should not be called');
     }
 }
 

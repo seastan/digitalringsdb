@@ -12,7 +12,9 @@
 namespace Symfony\Bridge\Doctrine\Tests\PropertyInfo\Fixtures;
 
 use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * @Entity
@@ -26,4 +28,15 @@ class DoctrineRelation
      * @Column(type="smallint")
      */
     public $id;
+
+    /**
+     * @Column(type="guid")
+     */
+    protected $rguid;
+
+    /**
+     * @Column(type="guid")
+     * @ManyToOne(targetEntity="DoctrineDummy", inversedBy="indexedFoo")
+     */
+    protected $foo;
 }

@@ -11,28 +11,15 @@
 
 namespace Symfony\Component\Form;
 
-use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Form\Exception\TransformationFailedException;
+use Symfony\Component\Form\Exception\UnexpectedTypeException;
 
 class CallbackTransformer implements DataTransformerInterface
 {
-    /**
-     * The callback used for forward transform.
-     *
-     * @var callable
-     */
     private $transform;
-
-    /**
-     * The callback used for reverse transform.
-     *
-     * @var callable
-     */
     private $reverseTransform;
 
     /**
-     * Constructor.
-     *
      * @param callable $transform        The forward transform callback
      * @param callable $reverseTransform The reverse transform callback
      *
@@ -40,10 +27,10 @@ class CallbackTransformer implements DataTransformerInterface
      */
     public function __construct($transform, $reverseTransform)
     {
-        if (!is_callable($transform)) {
+        if (!\is_callable($transform)) {
             throw new \InvalidArgumentException('Argument 1 should be a callable');
         }
-        if (!is_callable($reverseTransform)) {
+        if (!\is_callable($reverseTransform)) {
             throw new \InvalidArgumentException('Argument 2 should be a callable');
         }
 
@@ -63,7 +50,7 @@ class CallbackTransformer implements DataTransformerInterface
      */
     public function transform($data)
     {
-        return call_user_func($this->transform, $data);
+        return \call_user_func($this->transform, $data);
     }
 
     /**
@@ -79,6 +66,6 @@ class CallbackTransformer implements DataTransformerInterface
      */
     public function reverseTransform($data)
     {
-        return call_user_func($this->reverseTransform, $data);
+        return \call_user_func($this->reverseTransform, $data);
     }
 }

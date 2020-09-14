@@ -11,9 +11,9 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Templating\Helper;
 
-use Symfony\Component\Templating\Helper\Helper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Templating\Helper\Helper;
 
 /**
  * RequestHelper provides access to the current request parameters.
@@ -26,8 +26,6 @@ class RequestHelper extends Helper
     protected $requestStack;
 
     /**
-     * Constructor.
-     *
      * @param Request|RequestStack $requestStack A RequestStack instance or a Request instance
      *
      * @deprecated since version 2.5, passing a Request instance is deprecated and support for it will be removed in 3.0.

@@ -11,10 +11,10 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Templating;
 
-@trigger_error('The '.__NAMESPACE__.'\Debugger class is deprecated since version 2.4 and will be removed in 3.0. Use the Psr\Log\LoggerInterface interface instead.', E_USER_DEPRECATED);
+@trigger_error('The '.__NAMESPACE__.'\Debugger class is deprecated since Symfony 2.4 and will be removed in 3.0. Use the Psr\Log\LoggerInterface interface instead.', E_USER_DEPRECATED);
 
-use Symfony\Component\Templating\DebuggerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Templating\DebuggerInterface;
 
 /**
  * Binds the Symfony templating loader debugger to the Symfony logger.
@@ -28,11 +28,6 @@ class Debugger implements DebuggerInterface
 {
     protected $logger;
 
-    /**
-     * Constructor.
-     *
-     * @param LoggerInterface $logger A LoggerInterface instance
-     */
     public function __construct(LoggerInterface $logger = null)
     {
         $this->logger = $logger;

@@ -111,7 +111,7 @@ class PhpDocExtractor implements PropertyDescriptionExtractorInterface, Property
             $nullable = false !== $nullKey;
 
             // Remove the null type from the type if other types are defined
-            if ($nullable && count($varTypes) > 1) {
+            if ($nullable && \count($varTypes) > 1) {
                 unset($varTypes[$nullKey]);
             }
 
@@ -127,7 +127,7 @@ class PhpDocExtractor implements PropertyDescriptionExtractorInterface, Property
             return;
         }
 
-        if (!in_array($prefix, ReflectionExtractor::$arrayMutatorPrefixes)) {
+        if (!\in_array($prefix, ReflectionExtractor::$arrayMutatorPrefixes)) {
             return $types;
         }
 
@@ -208,7 +208,7 @@ class PhpDocExtractor implements PropertyDescriptionExtractorInterface, Property
         // Use a ReflectionProperty instead of $class to get the parent class if applicable
         try {
             $reflectionProperty = new \ReflectionProperty($class, $property);
-        } catch (\ReflectionException $reflectionException) {
+        } catch (\ReflectionException $e) {
             return;
         }
 
@@ -242,17 +242,20 @@ class PhpDocExtractor implements PropertyDescriptionExtractorInterface, Property
      * @param string $ucFirstProperty
      * @param int    $type
      *
-     * @return DocBlock|null
+     * @return array|null
      */
     private function getDocBlockFromMethod($class, $ucFirstProperty, $type)
     {
-        $prefixes = $type === self::ACCESSOR ? ReflectionExtractor::$accessorPrefixes : ReflectionExtractor::$mutatorPrefixes;
+        $prefixes = self::ACCESSOR === $type ? ReflectionExtractor::$accessorPrefixes : ReflectionExtractor::$mutatorPrefixes;
 
         foreach ($prefixes as $prefix) {
             $methodName = $prefix.$ucFirstProperty;
 
             try {
                 $reflectionMethod = new \ReflectionMethod($class, $methodName);
+                if ($reflectionMethod->isStatic()) {
+                    continue;
+                }
 
                 if (
                     (self::ACCESSOR === $type && 0 === $reflectionMethod->getNumberOfRequiredParameters()) ||
@@ -260,7 +263,7 @@ class PhpDocExtractor implements PropertyDescriptionExtractorInterface, Property
                 ) {
                     break;
                 }
-            } catch (\ReflectionException $reflectionException) {
+            } catch (\ReflectionException $e) {
                 // Try the next prefix if the method doesn't exist
             }
         }
@@ -316,28 +319,26 @@ class PhpDocExtractor implements PropertyDescriptionExtractorInterface, Property
     {
         // Cannot guess
         if (!$docType || 'mixed' === $docType) {
-            return;
+            return null;
         }
 
-        if ($collection = '[]' === substr($docType, -2)) {
-            $docType = substr($docType, 0, -2);
+        if ('[]' === substr($docType, -2)) {
+            if ('mixed[]' === $docType) {
+                $collectionKeyType = null;
+                $collectionValueType = null;
+            } else {
+                $collectionKeyType = new Type(Type::BUILTIN_TYPE_INT);
+                $collectionValueType = $this->createType(substr($docType, 0, -2), $nullable);
+            }
+
+            return new Type(Type::BUILTIN_TYPE_ARRAY, $nullable, null, true, $collectionKeyType, $collectionValueType);
         }
 
         $docType = $this->normalizeType($docType);
         list($phpType, $class) = $this->getPhpTypeAndClass($docType);
 
-        $array = 'array' === $docType;
-
-        if ($collection || $array) {
-            if ($array || 'mixed' === $docType) {
-                $collectionKeyType = null;
-                $collectionValueType = null;
-            } else {
-                $collectionKeyType = new Type(Type::BUILTIN_TYPE_INT);
-                $collectionValueType = new Type($phpType, false, $class);
-            }
-
-            return new Type(Type::BUILTIN_TYPE_ARRAY, false, null, true, $collectionKeyType, $collectionValueType);
+        if ('array' === $docType) {
+            return new Type(Type::BUILTIN_TYPE_ARRAY, $nullable, null, true, null, null);
         }
 
         return new Type($phpType, $nullable, $class);
@@ -383,7 +384,7 @@ class PhpDocExtractor implements PropertyDescriptionExtractorInterface, Property
      */
     private function getPhpTypeAndClass($docType)
     {
-        if (in_array($docType, Type::$builtinTypes)) {
+        if (\in_array($docType, Type::$builtinTypes)) {
             return array($docType, null);
         }
 

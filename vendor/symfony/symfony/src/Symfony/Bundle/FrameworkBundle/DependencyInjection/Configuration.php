@@ -48,7 +48,7 @@ class Configuration implements ConfigurationInterface
             ->beforeNormalization()
                 ->ifTrue(function ($v) { return isset($v['csrf_protection']['field_name']); })
                 ->then(function ($v) {
-                    @trigger_error('The framework.csrf_protection.field_name configuration key is deprecated since version 2.4 and will be removed in 3.0. Use the framework.form.csrf_protection.field_name configuration key instead', E_USER_DEPRECATED);
+                    @trigger_error('The framework.csrf_protection.field_name configuration key is deprecated since Symfony 2.4 and will be removed in 3.0. Use the framework.form.csrf_protection.field_name configuration key instead', E_USER_DEPRECATED);
 
                     return $v;
                 })
@@ -58,9 +58,9 @@ class Configuration implements ConfigurationInterface
                 ->then(function ($v) {
                     if (!isset($v['templating'])
                         || !$v['templating']['assets_version']
-                        && !count($v['templating']['assets_base_urls']['http'])
-                        && !count($v['templating']['assets_base_urls']['ssl'])
-                        && !count($v['templating']['packages'])
+                        && !\count($v['templating']['assets_base_urls']['http'])
+                        && !\count($v['templating']['assets_base_urls']['ssl'])
+                        && !\count($v['templating']['packages'])
                     ) {
                         $v['assets'] = array(
                             'version' => null,
@@ -78,11 +78,11 @@ class Configuration implements ConfigurationInterface
                 ->ifTrue(function ($v) { return isset($v['templating']); })
                 ->then(function ($v) {
                     if ($v['templating']['assets_version']
-                        || count($v['templating']['assets_base_urls']['http'])
-                        || count($v['templating']['assets_base_urls']['ssl'])
-                        || count($v['templating']['packages'])
+                        || \count($v['templating']['assets_base_urls']['http'])
+                        || \count($v['templating']['assets_base_urls']['ssl'])
+                        || \count($v['templating']['packages'])
                     ) {
-                        @trigger_error('The assets settings under framework.templating are deprecated since version 2.7 and will be removed in 3.0. Use the framework.assets configuration key instead', E_USER_DEPRECATED);
+                        @trigger_error('The assets settings under framework.templating are deprecated since Symfony 2.7 and will be removed in 3.0. Use the framework.assets configuration key instead', E_USER_DEPRECATED);
 
                         // convert the old configuration to the new one
                         if (isset($v['assets'])) {
@@ -115,7 +115,7 @@ class Configuration implements ConfigurationInterface
             ->beforeNormalization()
                 ->ifTrue(function ($v) { return isset($v['validation']['api']); })
                 ->then(function ($v) {
-                    @trigger_error('The validation.api configuration key is deprecated since version 2.7 and will be removed in 3.0', E_USER_DEPRECATED);
+                    @trigger_error('The validation.api configuration key is deprecated since Symfony 2.7 and will be removed in 3.0', E_USER_DEPRECATED);
 
                     return $v;
                 })
@@ -128,8 +128,8 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->arrayNode('trusted_proxies')
                     ->beforeNormalization()
-                        ->ifTrue(function ($v) { return !is_array($v) && null !== $v; })
-                        ->then(function ($v) { return is_bool($v) ? array() : preg_split('/\s*,\s*/', $v); })
+                        ->ifTrue(function ($v) { return !\is_array($v) && null !== $v; })
+                        ->then(function ($v) { return \is_bool($v) ? array() : preg_split('/\s*,\s*/', $v); })
                     ->end()
                     ->prototype('scalar')
                         ->validate()
@@ -282,7 +282,7 @@ class Configuration implements ConfigurationInterface
                             ->beforeNormalization()
                                 ->ifTrue(function ($v) { return 'file:' !== substr($v, 0, 5); })
                                 ->then(function ($v) {
-                                    @trigger_error('The profiler.dsn configuration key must start with "file:" because all the storages except the filesystem are deprecated since version 2.8 and will be removed in 3.0.', E_USER_DEPRECATED);
+                                    @trigger_error('The profiler.dsn configuration key must start with "file:" because all the storages except the filesystem are deprecated since Symfony 2.8 and will be removed in 3.0.', E_USER_DEPRECATED);
 
                                     return $v;
                                 })
@@ -293,7 +293,7 @@ class Configuration implements ConfigurationInterface
                             ->beforeNormalization()
                                 ->always()
                                 ->then(function ($v) {
-                                    @trigger_error('The profiler.username configuration key is deprecated since version 2.8 and will be removed in 3.0.', E_USER_DEPRECATED);
+                                    @trigger_error('The profiler.username configuration key is deprecated since Symfony 2.8 and will be removed in 3.0.', E_USER_DEPRECATED);
 
                                     return $v;
                                 })
@@ -304,7 +304,7 @@ class Configuration implements ConfigurationInterface
                             ->beforeNormalization()
                                 ->always()
                                 ->then(function ($v) {
-                                    @trigger_error('The profiler.password configuration key is deprecated since version 2.8 and will be removed in 3.0.', E_USER_DEPRECATED);
+                                    @trigger_error('The profiler.password configuration key is deprecated since Symfony 2.8 and will be removed in 3.0.', E_USER_DEPRECATED);
 
                                     return $v;
                                 })
@@ -315,7 +315,7 @@ class Configuration implements ConfigurationInterface
                             ->beforeNormalization()
                                 ->always()
                                 ->then(function ($v) {
-                                    @trigger_error('The profiler.lifetime configuration key is deprecated since version 2.8 and will be removed in 3.0.', E_USER_DEPRECATED);
+                                    @trigger_error('The profiler.lifetime configuration key is deprecated since Symfony 2.8 and will be removed in 3.0.', E_USER_DEPRECATED);
 
                                     return $v;
                                 })
@@ -380,7 +380,16 @@ class Configuration implements ConfigurationInterface
                     ->children()
                         ->scalarNode('storage_id')->defaultValue('session.storage.native')->end()
                         ->scalarNode('handler_id')->defaultValue('session.handler.native_file')->end()
-                        ->scalarNode('name')->end()
+                        ->scalarNode('name')
+                            ->validate()
+                                ->ifTrue(function ($v) {
+                                    parse_str($v, $parsed);
+
+                                    return implode('&', array_keys($parsed)) !== (string) $v;
+                                })
+                                ->thenInvalid('Session name %s contains illegal character(s)')
+                            ->end()
+                        ->end()
                         ->scalarNode('cookie_lifetime')->end()
                         ->scalarNode('cookie_path')->end()
                         ->scalarNode('cookie_domain')->end()
@@ -390,6 +399,7 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('gc_divisor')->end()
                         ->scalarNode('gc_probability')->defaultValue(1)->end()
                         ->scalarNode('gc_maxlifetime')->end()
+                        ->booleanNode('use_strict_mode')->end()
                         ->scalarNode('save_path')->defaultValue('%kernel.cache_dir%/sessions')->end()
                         ->integerNode('metadata_update_threshold')
                             ->defaultValue('0')
@@ -414,11 +424,11 @@ class Configuration implements ConfigurationInterface
                             ->useAttributeAsKey('name')
                             ->prototype('array')
                                 ->beforeNormalization()
-                                    ->ifTrue(function ($v) { return is_array($v) && isset($v['mime_type']); })
+                                    ->ifTrue(function ($v) { return \is_array($v) && isset($v['mime_type']); })
                                     ->then(function ($v) { return $v['mime_type']; })
                                 ->end()
                                 ->beforeNormalization()
-                                    ->ifTrue(function ($v) { return !is_array($v); })
+                                    ->ifTrue(function ($v) { return !\is_array($v); })
                                     ->then(function ($v) { return array($v); })
                                 ->end()
                                 ->prototype('scalar')->end()
@@ -439,7 +449,7 @@ class Configuration implements ConfigurationInterface
             );
 
             foreach ($urls as $i => $url) {
-                if (is_int($i)) {
+                if (\is_int($i)) {
                     if (0 === strpos($url, 'https://') || 0 === strpos($url, '//')) {
                         $urls['http'][] = $urls['ssl'][] = $url;
                     } else {
@@ -469,7 +479,7 @@ class Configuration implements ConfigurationInterface
                                     ->addDefaultChildrenIfNoneSet()
                                     ->prototype('scalar')->defaultValue('FrameworkBundle:Form')->end()
                                     ->validate()
-                                        ->ifTrue(function ($v) {return !in_array('FrameworkBundle:Form', $v); })
+                                        ->ifTrue(function ($v) {return !\in_array('FrameworkBundle:Form', $v); })
                                         ->then(function ($v) {
                                             return array_merge(array('FrameworkBundle:Form'), $v);
                                         })
@@ -485,7 +495,7 @@ class Configuration implements ConfigurationInterface
                             ->performNoDeepMerging()
                             ->addDefaultsIfNotSet()
                             ->beforeNormalization()
-                                ->ifTrue(function ($v) { return !is_array($v); })
+                                ->ifTrue(function ($v) { return !\is_array($v); })
                                 ->then(function ($v) { return array($v); })
                             ->end()
                             ->beforeNormalization()
@@ -510,7 +520,7 @@ class Configuration implements ConfigurationInterface
                             ->isRequired()
                             ->requiresAtLeastOneElement()
                             ->beforeNormalization()
-                                ->ifTrue(function ($v) { return !is_array($v); })
+                                ->ifTrue(function ($v) { return !\is_array($v); })
                                 ->then(function ($v) { return array($v); })
                             ->end()
                             ->prototype('scalar')->end()
@@ -520,7 +530,7 @@ class Configuration implements ConfigurationInterface
                     ->children()
                         ->arrayNode('loaders')
                             ->beforeNormalization()
-                                ->ifTrue(function ($v) { return !is_array($v); })
+                                ->ifTrue(function ($v) { return !\is_array($v); })
                                 ->then(function ($v) { return array($v); })
                              ->end()
                             ->prototype('scalar')->end()
@@ -546,7 +556,7 @@ class Configuration implements ConfigurationInterface
                                         ->performNoDeepMerging()
                                         ->addDefaultsIfNotSet()
                                         ->beforeNormalization()
-                                            ->ifTrue(function ($v) { return !is_array($v); })
+                                            ->ifTrue(function ($v) { return !\is_array($v); })
                                             ->then(function ($v) { return array($v); })
                                         ->end()
                                         ->beforeNormalization()
@@ -586,7 +596,7 @@ class Configuration implements ConfigurationInterface
                         ->arrayNode('base_urls')
                             ->requiresAtLeastOneElement()
                             ->beforeNormalization()
-                                ->ifTrue(function ($v) { return !is_array($v); })
+                                ->ifTrue(function ($v) { return !\is_array($v); })
                                 ->then(function ($v) { return array($v); })
                             ->end()
                             ->prototype('scalar')->end()
@@ -610,7 +620,7 @@ class Configuration implements ConfigurationInterface
                                     ->arrayNode('base_urls')
                                         ->requiresAtLeastOneElement()
                                         ->beforeNormalization()
-                                            ->ifTrue(function ($v) { return !is_array($v); })
+                                            ->ifTrue(function ($v) { return !\is_array($v); })
                                             ->then(function ($v) { return array($v); })
                                         ->end()
                                         ->prototype('scalar')->end()
@@ -662,7 +672,7 @@ class Configuration implements ConfigurationInterface
                                 // Can be removed in 3.0, once ApcCache support is dropped
                                 ->ifString()->then(function ($v) {
                                     if ('apc' === $v) {
-                                        @trigger_error('The ability to pass "apc" as the framework.validation.cache configuration key value is deprecated since version 2.8 and will be removed in 3.0. Use the "validator.mapping.cache.doctrine.apc" service id instead.', E_USER_DEPRECATED);
+                                        @trigger_error('The ability to pass "apc" as the framework.validation.cache configuration key value is deprecated since Symfony 2.8 and will be removed in 3.0. Use the "validator.mapping.cache.doctrine.apc" service id instead.', E_USER_DEPRECATED);
 
                                         return 'validator.mapping.cache.apc';
                                     }
@@ -677,7 +687,7 @@ class Configuration implements ConfigurationInterface
                             ->prototype('scalar')->end()
                             ->treatFalseLike(array())
                             ->validate()
-                                ->ifTrue(function ($v) { return !is_array($v); })
+                                ->ifTrue(function ($v) { return !\is_array($v); })
                                 ->then(function ($v) { return (array) $v; })
                             ->end()
                         ->end()
@@ -708,7 +718,7 @@ class Configuration implements ConfigurationInterface
                     ->children()
                         ->scalarNode('cache')->defaultValue('file')->end()
                         ->scalarNode('file_cache_dir')->defaultValue('%kernel.cache_dir%/annotations')->end()
-                        ->booleanNode('debug')->defaultValue('%kernel.debug%')->end()
+                        ->booleanNode('debug')->defaultValue($this->debug)->end()
                     ->end()
                 ->end()
             ->end()

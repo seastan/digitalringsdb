@@ -11,9 +11,10 @@
 
 namespace Symfony\Component\ClassLoader\Tests;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\ClassLoader\Psr4ClassLoader;
 
-class Psr4ClassLoaderTest extends \PHPUnit_Framework_TestCase
+class Psr4ClassLoaderTest extends TestCase
 {
     /**
      * @param string $className
@@ -24,7 +25,7 @@ class Psr4ClassLoaderTest extends \PHPUnit_Framework_TestCase
         $loader = new Psr4ClassLoader();
         $loader->addPrefix(
             'Acme\\DemoLib',
-            __DIR__.DIRECTORY_SEPARATOR.'Fixtures'.DIRECTORY_SEPARATOR.'psr-4'
+            __DIR__.\DIRECTORY_SEPARATOR.'Fixtures'.\DIRECTORY_SEPARATOR.'psr-4'
         );
         $loader->loadClass($className);
         $this->assertTrue(class_exists($className), sprintf('loadClass() should load %s', $className));
@@ -52,7 +53,7 @@ class Psr4ClassLoaderTest extends \PHPUnit_Framework_TestCase
         $loader = new Psr4ClassLoader();
         $loader->addPrefix(
             'Acme\\DemoLib',
-            __DIR__.DIRECTORY_SEPARATOR.'Fixtures'.DIRECTORY_SEPARATOR.'psr-4'
+            __DIR__.\DIRECTORY_SEPARATOR.'Fixtures'.\DIRECTORY_SEPARATOR.'psr-4'
         );
         $loader->loadClass($className);
         $this->assertFalse(class_exists($className), sprintf('loadClass() should not load %s', $className));

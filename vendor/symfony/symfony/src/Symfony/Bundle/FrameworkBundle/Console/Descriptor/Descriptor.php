@@ -72,11 +72,11 @@ abstract class Descriptor implements DescriptorInterface
             case $object instanceof EventDispatcherInterface:
                 $this->describeEventDispatcherListeners($object, $options);
                 break;
-            case is_callable($object):
+            case \is_callable($object):
                 $this->describeCallable($object, $options);
                 break;
             default:
-                throw new \InvalidArgumentException(sprintf('Object of type "%s" is not describable.', get_class($object)));
+                throw new \InvalidArgumentException(sprintf('Object of type "%s" is not describable.', \get_class($object)));
         }
     }
 
@@ -110,9 +110,10 @@ abstract class Descriptor implements DescriptorInterface
     protected function renderTable(Table $table, $decorated = false)
     {
         if (!$decorated) {
-            $table->getStyle()->setCellRowFormat('%s');
-            $table->getStyle()->setCellRowContentFormat('%s');
-            $table->getStyle()->setCellHeaderFormat('%s');
+            $tableStyle = $table->getStyle();
+            $tableStyle->setCellRowFormat('%s');
+            $tableStyle->setCellRowContentFormat('%s');
+            $tableStyle->setCellHeaderFormat('%s');
         }
 
         $table->render();
@@ -120,33 +121,21 @@ abstract class Descriptor implements DescriptorInterface
 
     /**
      * Describes an InputArgument instance.
-     *
-     * @param RouteCollection $routes
-     * @param array           $options
      */
     abstract protected function describeRouteCollection(RouteCollection $routes, array $options = array());
 
     /**
      * Describes an InputOption instance.
-     *
-     * @param Route $route
-     * @param array $options
      */
     abstract protected function describeRoute(Route $route, array $options = array());
 
     /**
      * Describes container parameters.
-     *
-     * @param ParameterBag $parameters
-     * @param array        $options
      */
     abstract protected function describeContainerParameters(ParameterBag $parameters, array $options = array());
 
     /**
      * Describes container tags.
-     *
-     * @param ContainerBuilder $builder
-     * @param array            $options
      */
     abstract protected function describeContainerTags(ContainerBuilder $builder, array $options = array());
 
@@ -166,33 +155,21 @@ abstract class Descriptor implements DescriptorInterface
      *
      * Common options are:
      * * tag: filters described services by given tag
-     *
-     * @param ContainerBuilder $builder
-     * @param array            $options
      */
     abstract protected function describeContainerServices(ContainerBuilder $builder, array $options = array());
 
     /**
      * Describes a service definition.
-     *
-     * @param Definition $definition
-     * @param array      $options
      */
     abstract protected function describeContainerDefinition(Definition $definition, array $options = array());
 
     /**
      * Describes a service alias.
-     *
-     * @param Alias $alias
-     * @param array $options
      */
     abstract protected function describeContainerAlias(Alias $alias, array $options = array());
 
     /**
      * Describes a container parameter.
-     *
-     * @param string $parameter
-     * @param array  $options
      */
     abstract protected function describeContainerParameter($parameter, array $options = array());
 
@@ -201,9 +178,6 @@ abstract class Descriptor implements DescriptorInterface
      *
      * Common options are:
      * * name: name of listened event
-     *
-     * @param EventDispatcherInterface $eventDispatcher
-     * @param array                    $options
      */
     abstract protected function describeEventDispatcherListeners(EventDispatcherInterface $eventDispatcher, array $options = array());
 
@@ -224,11 +198,11 @@ abstract class Descriptor implements DescriptorInterface
      */
     protected function formatValue($value)
     {
-        if (is_object($value)) {
-            return sprintf('object(%s)', get_class($value));
+        if (\is_object($value)) {
+            return sprintf('object(%s)', \get_class($value));
         }
 
-        if (is_string($value)) {
+        if (\is_string($value)) {
             return $value;
         }
 
@@ -244,7 +218,7 @@ abstract class Descriptor implements DescriptorInterface
      */
     protected function formatParameter($value)
     {
-        if (is_bool($value) || is_array($value) || (null === $value)) {
+        if (\is_bool($value) || \is_array($value) || (null === $value)) {
             $jsonString = json_encode($value);
 
             if (preg_match('/^(.{60})./us', $jsonString, $matches)) {
@@ -272,6 +246,10 @@ abstract class Descriptor implements DescriptorInterface
         // Some service IDs don't have a Definition, they're simply an Alias
         if ($builder->hasAlias($serviceId)) {
             return $builder->getAlias($serviceId);
+        }
+
+        if ('service_container' === $serviceId) {
+            return $builder;
         }
 
         // the service has been injected in some special way, just return the service

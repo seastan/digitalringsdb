@@ -55,14 +55,14 @@ class Configuration implements ConfigurationInterface
             ->beforeNormalization()
                 ->ifTrue(function ($v) { return isset($v['form']['resources']); })
                 ->then(function ($v) {
-                    @trigger_error('The twig.form.resources configuration key is deprecated since version 2.6 and will be removed in 3.0. Use the twig.form_themes configuration key instead.', E_USER_DEPRECATED);
+                    @trigger_error('The twig.form.resources configuration key is deprecated since Symfony 2.6 and will be removed in 3.0. Use the twig.form_themes configuration key instead.', E_USER_DEPRECATED);
 
                     return $v;
                 })
             ->end()
             ->validate()
                 ->ifTrue(function ($v) {
-                    return count($v['form']['resources']) > 0;
+                    return \count($v['form']['resources']) > 0;
                 })
                 ->then(function ($v) {
                     $v['form_themes'] = array_values(array_unique(array_merge($v['form']['resources'], $v['form_themes'])));
@@ -81,7 +81,7 @@ class Configuration implements ConfigurationInterface
                             ->prototype('scalar')->defaultValue('form_div_layout.html.twig')->end()
                             ->example(array('MyBundle::form.html.twig'))
                             ->validate()
-                                ->ifTrue(function ($v) {return !in_array('form_div_layout.html.twig', $v); })
+                                ->ifTrue(function ($v) {return !\in_array('form_div_layout.html.twig', $v); })
                                 ->then(function ($v) {
                                     return array_merge(array('form_div_layout.html.twig'), $v);
                                 })
@@ -103,7 +103,7 @@ class Configuration implements ConfigurationInterface
                     ->prototype('scalar')->defaultValue('form_div_layout.html.twig')->end()
                     ->example(array('MyBundle::form.html.twig'))
                     ->validate()
-                        ->ifTrue(function ($v) { return !in_array('form_div_layout.html.twig', $v); })
+                        ->ifTrue(function ($v) { return !\in_array('form_div_layout.html.twig', $v); })
                         ->then(function ($v) {
                             return array_merge(array('form_div_layout.html.twig'), $v);
                         })
@@ -124,7 +124,7 @@ class Configuration implements ConfigurationInterface
                     ->example(array('foo' => '"@bar"', 'pi' => 3.14))
                     ->prototype('array')
                         ->beforeNormalization()
-                            ->ifTrue(function ($v) { return is_string($v) && 0 === strpos($v, '@'); })
+                            ->ifTrue(function ($v) { return \is_string($v) && 0 === strpos($v, '@'); })
                             ->then(function ($v) {
                                 if (0 === strpos($v, '@@')) {
                                     return substr($v, 1);
@@ -135,7 +135,7 @@ class Configuration implements ConfigurationInterface
                         ->end()
                         ->beforeNormalization()
                             ->ifTrue(function ($v) {
-                                if (is_array($v)) {
+                                if (\is_array($v)) {
                                     $keys = array_keys($v);
                                     sort($keys);
 
@@ -167,10 +167,10 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->fixXmlConfig('path')
             ->children()
-                ->variableNode('autoescape')->defaultValue('filename')->end()
+                ->variableNode('autoescape')->defaultValue('name')->end()
                 ->scalarNode('autoescape_service')->defaultNull()->end()
                 ->scalarNode('autoescape_service_method')->defaultNull()->end()
-                ->scalarNode('base_template_class')->example('Twig_Template')->cannotBeEmpty()->end()
+                ->scalarNode('base_template_class')->example('Twig\Template')->cannotBeEmpty()->end()
                 ->scalarNode('cache')->defaultValue('%kernel.cache_dir%/twig')->end()
                 ->scalarNode('charset')->defaultValue('%kernel.charset%')->end()
                 ->booleanNode('debug')->defaultValue('%kernel.debug%')->end()
@@ -185,7 +185,7 @@ class Configuration implements ConfigurationInterface
                         ->then(function ($paths) {
                             $normalized = array();
                             foreach ($paths as $path => $namespace) {
-                                if (is_array($namespace)) {
+                                if (\is_array($namespace)) {
                                     // xml
                                     $path = $namespace['value'];
                                     $namespace = $namespace['namespace'];

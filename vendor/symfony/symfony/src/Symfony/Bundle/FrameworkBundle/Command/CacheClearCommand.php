@@ -15,8 +15,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * Clear and Warmup the cache.
@@ -96,7 +96,7 @@ EOF
             $this->warmup($warmupDir, $realCacheDir, !$input->getOption('no-optional-warmers'));
 
             $filesystem->rename($realCacheDir, $oldCacheDir);
-            if ('\\' === DIRECTORY_SEPARATOR) {
+            if ('\\' === \DIRECTORY_SEPARATOR) {
                 sleep(1);  // workaround for Windows PHP rename bug
             }
             $filesystem->rename($warmupDir, $realCacheDir);
@@ -124,7 +124,7 @@ EOF
     {
         // create a temporary kernel
         $realKernel = $this->getContainer()->get('kernel');
-        $realKernelClass = get_class($realKernel);
+        $realKernelClass = \get_class($realKernel);
         $namespace = '';
         if (false !== $pos = strrpos($realKernelClass, '\\')) {
             $namespace = substr($realKernelClass, 0, $pos);
@@ -144,10 +144,10 @@ EOF
         $warmer->warmUp($warmupDir);
 
         // fix references to the Kernel in .meta files
-        $safeTempKernel = str_replace('\\', '\\\\', get_class($tempKernel));
-        $realKernelFQN = get_class($realKernel);
+        $safeTempKernel = str_replace('\\', '\\\\', \get_class($tempKernel));
+        $realKernelFQN = \get_class($realKernel);
 
-        foreach (Finder::create()->files()->name('*.meta')->in($warmupDir) as $file) {
+        foreach (Finder::create()->files()->depth('<3')->name('*.meta')->in($warmupDir) as $file) {
             file_put_contents($file, preg_replace(
                 '/(C\:\d+\:)"'.$safeTempKernel.'"/',
                 sprintf('$1"%s"', $realKernelFQN),
@@ -159,26 +159,19 @@ EOF
         $search = array($warmupDir, str_replace('\\', '\\\\', $warmupDir));
         $replace = str_replace('\\', '/', $realCacheDir);
         foreach (Finder::create()->files()->in($warmupDir) as $file) {
-            $content = str_replace($search, $replace, file_get_contents($file));
-            file_put_contents($file, $content);
+            $content = str_replace($search, $replace, file_get_contents($file), $count);
+            if ($count) {
+                file_put_contents($file, $content);
+            }
         }
 
-        // fix references to kernel/container related classes
-        $fileSearch = $tempKernel->getName().ucfirst($tempKernel->getEnvironment()).'*';
-        $search = array(
-            $tempKernel->getName().ucfirst($tempKernel->getEnvironment()),
-            sprintf('\'kernel.name\' => \'%s\'', $tempKernel->getName()),
-            sprintf('key="kernel.name">%s<', $tempKernel->getName()),
-        );
-        $replace = array(
-            $realKernel->getName().ucfirst($realKernel->getEnvironment()),
-            sprintf('\'kernel.name\' => \'%s\'', $realKernel->getName()),
-            sprintf('key="kernel.name">%s<', $realKernel->getName()),
-        );
-        foreach (Finder::create()->files()->name($fileSearch)->in($warmupDir) as $file) {
-            $content = str_replace($search, $replace, file_get_contents($file));
-            file_put_contents(str_replace($search, $replace, $file), $content);
-            unlink($file);
+        // fix references to container's class
+        $tempContainerClass = \get_class($tempKernel->getContainer());
+        $realContainerClass = \get_class($realKernel->getContainer());
+        foreach (Finder::create()->files()->depth('<2')->name($tempContainerClass.'*')->in($warmupDir) as $file) {
+            $content = str_replace($tempContainerClass, $realContainerClass, file_get_contents($file));
+            file_put_contents($file, $content);
+            rename($file, str_replace(\DIRECTORY_SEPARATOR.$tempContainerClass, \DIRECTORY_SEPARATOR.$realContainerClass, $file));
         }
 
         // remove temp kernel file after cache warmed up
@@ -201,8 +194,8 @@ EOF
         // the temp kernel class name must have the same length than the real one
         // to avoid the many problems in serialized resources files
         $class = substr($parentClass, 0, -1).'_';
-        // the temp kernel name must be changed too
-        $name = var_export(substr($parent->getName(), 0, -1).'_', true);
+        // the temp container class must be changed too
+        $containerClass = var_export(substr(\get_class($parent->getContainer()), 0, -1).'_', true);
         $code = <<<EOF
 <?php
 
@@ -215,11 +208,6 @@ namespace $namespace
             return $cacheDir;
         }
 
-        public function getName()
-        {
-            return $name;
-        }
-
         public function getRootDir()
         {
             return $rootDir;
@@ -228,6 +216,11 @@ namespace $namespace
         public function getLogDir()
         {
             return $logDir;
+        }
+
+        protected function getContainerClass()
+        {
+            return $containerClass;
         }
 
         protected function buildContainer()

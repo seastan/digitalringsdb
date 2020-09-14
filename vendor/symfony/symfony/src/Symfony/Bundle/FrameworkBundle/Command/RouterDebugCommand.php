@@ -17,8 +17,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Routing\Route;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * A console command for retrieving information about routes.
@@ -86,10 +86,10 @@ EOF
 
         $name = $input->getArgument('name');
         $helper = new DescriptorHelper();
+        $routes = $this->getContainer()->get('router')->getRouteCollection();
 
         if ($name) {
-            $route = $this->getContainer()->get('router')->getRouteCollection()->get($name);
-            if (!$route) {
+            if (!$route = $routes->get($name)) {
                 throw new \InvalidArgumentException(sprintf('The route "%s" does not exist.', $name));
             }
 
@@ -102,8 +102,6 @@ EOF
                 'output' => $io,
             ));
         } else {
-            $routes = $this->getContainer()->get('router')->getRouteCollection();
-
             foreach ($routes as $route) {
                 $this->convertController($route);
             }

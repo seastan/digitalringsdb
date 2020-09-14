@@ -11,9 +11,9 @@
 
 namespace Symfony\Component\HttpKernel\DependencyInjection;
 
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 
 /**
  * Adds services tagged kernel.fragment_renderer as HTTP content rendering strategies.
@@ -52,9 +52,14 @@ class FragmentRendererPass implements CompilerPassInterface
                 throw new \InvalidArgumentException(sprintf('The service "%s" must not be abstract as fragment renderer are lazy-loaded.', $id));
             }
 
-            $refClass = new \ReflectionClass($container->getParameterBag()->resolveValue($def->getClass()));
+            $class = $container->getParameterBag()->resolveValue($def->getClass());
             $interface = 'Symfony\Component\HttpKernel\Fragment\FragmentRendererInterface';
-            if (!$refClass->implementsInterface($interface)) {
+
+            if (!is_subclass_of($class, $interface)) {
+                if (!class_exists($class, false)) {
+                    throw new \InvalidArgumentException(sprintf('Class "%s" used for service "%s" cannot be found.', $class, $id));
+                }
+
                 throw new \InvalidArgumentException(sprintf('Service "%s" must implement interface "%s".', $id, $interface));
             }
 

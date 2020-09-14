@@ -11,14 +11,15 @@
 
 namespace Symfony\Bridge\Doctrine\Tests\DependencyInjection;
 
-use Symfony\Component\DependencyInjection\Definition;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 
 /**
  * @author  Fabio B. Silva <fabio.bat.silva@gmail.com>
  */
-class DoctrineExtensionTest extends \PHPUnit_Framework_TestCase
+class DoctrineExtensionTest extends TestCase
 {
     /**
      * @var \Symfony\Bridge\Doctrine\DependencyInjection\AbstractDoctrineExtension
@@ -44,7 +45,7 @@ class DoctrineExtensionTest extends \PHPUnit_Framework_TestCase
         $this->extension->expects($this->any())
             ->method('getObjectManagerElementName')
             ->will($this->returnCallback(function ($name) {
-                 return 'doctrine.orm.'.$name;
+                return 'doctrine.orm.'.$name;
             }));
     }
 
@@ -67,7 +68,7 @@ class DoctrineExtensionTest extends \PHPUnit_Framework_TestCase
             'SecondBundle' => 'My\SecondBundle',
         );
 
-        $reflection = new \ReflectionClass(get_class($this->extension));
+        $reflection = new \ReflectionClass(\get_class($this->extension));
         $method = $reflection->getMethod('fixManagersAutoMappings');
         $method->setAccessible(true);
 
@@ -156,7 +157,7 @@ class DoctrineExtensionTest extends \PHPUnit_Framework_TestCase
             'SecondBundle' => 'My\SecondBundle',
         );
 
-        $reflection = new \ReflectionClass(get_class($this->extension));
+        $reflection = new \ReflectionClass(\get_class($this->extension));
         $method = $reflection->getMethod('fixManagersAutoMappings');
         $method->setAccessible(true);
 
@@ -266,8 +267,6 @@ class DoctrineExtensionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param array $data
-     *
      * @return \Symfony\Component\DependencyInjection\ContainerBuilder
      */
     protected function createContainer(array $data = array())

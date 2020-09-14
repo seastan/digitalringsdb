@@ -11,14 +11,14 @@
 
 namespace Symfony\Component\Form\Extension\Core\ChoiceList;
 
-@trigger_error('The '.__NAMESPACE__.'\ObjectChoiceList class is deprecated since version 2.7 and will be removed in 3.0. Use Symfony\Component\Form\ChoiceList\ArrayChoiceList instead.', E_USER_DEPRECATED);
+@trigger_error('The '.__NAMESPACE__.'\ObjectChoiceList class is deprecated since Symfony 2.7 and will be removed in 3.0. Use Symfony\Component\Form\ChoiceList\ArrayChoiceList instead.', E_USER_DEPRECATED);
 
-use Symfony\Component\Form\Exception\StringCastException;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
-use Symfony\Component\PropertyAccess\PropertyPath;
+use Symfony\Component\Form\Exception\StringCastException;
 use Symfony\Component\PropertyAccess\Exception\NoSuchPropertyException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
+use Symfony\Component\PropertyAccess\PropertyPath;
 
 /**
  * A choice list for object choices.
@@ -26,12 +26,10 @@ use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
  * Supports generation of choice labels, choice groups and choice values
  * by calling getters of the object (or associated objects).
  *
- * <code>
- * $choices = array($user1, $user2);
+ *     $choices = array($user1, $user2);
  *
- * // call getName() to determine the choice labels
- * $choiceList = new ObjectChoiceList($choices, 'name');
- * </code>
+ *     // call getName() to determine the choice labels
+ *     $choiceList = new ObjectChoiceList($choices, 'name');
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  *
@@ -81,14 +79,14 @@ class ObjectChoiceList extends ChoiceList
      *                                                    path is NULL, the object's __toString() method
      *                                                    is used instead.
      * @param array                     $preferredChoices A flat array of choices that should be
-     *                                                    presented to the user with priority.
+     *                                                    presented to the user with priority
      * @param string                    $groupPath        A property path pointing to the property used
      *                                                    to group the choices. Only allowed if
      *                                                    the choices are given as flat array.
      * @param string                    $valuePath        A property path pointing to the property used
      *                                                    for the choice values. If not given, integers
      *                                                    are generated instead.
-     * @param PropertyAccessorInterface $propertyAccessor The reflection graph for reading property paths.
+     * @param PropertyAccessorInterface $propertyAccessor The reflection graph for reading property paths
      */
     public function __construct($choices, $labelPath = null, array $preferredChoices = array(), $groupPath = null, $valuePath = null, PropertyAccessorInterface $propertyAccessor = null)
     {
@@ -105,12 +103,12 @@ class ObjectChoiceList extends ChoiceList
      *
      * Safe to be called multiple times. The list is cleared on every call.
      *
-     * @param array|\Traversable $choices          The choices to write into the list.
-     * @param array              $labels           Ignored.
-     * @param array              $preferredChoices The choices to display with priority.
+     * @param array|\Traversable $choices          The choices to write into the list
+     * @param array              $labels           Ignored
+     * @param array              $preferredChoices The choices to display with priority
      *
-     * @throws InvalidArgumentException When passing a hierarchy of choices and using
-     *                                  the "groupPath" option at the same time.
+     * @throws InvalidArgumentException when passing a hierarchy of choices and using
+     *                                  the "groupPath" option at the same time
      */
     protected function initialize($choices, array $labels, array $preferredChoices)
     {
@@ -118,7 +116,7 @@ class ObjectChoiceList extends ChoiceList
             $groupedChoices = array();
 
             foreach ($choices as $i => $choice) {
-                if (is_array($choice)) {
+                if (\is_array($choice)) {
                     throw new InvalidArgumentException('You should pass a plain object array (without groups) when using the "groupPath" option.');
                 }
 
@@ -168,7 +166,7 @@ class ObjectChoiceList extends ChoiceList
 
         foreach ($choices as $i => $givenChoice) {
             // Ignore non-readable choices
-            if (!is_object($givenChoice) && !is_array($givenChoice)) {
+            if (!\is_object($givenChoice) && !\is_array($givenChoice)) {
                 continue;
             }
 
@@ -179,7 +177,7 @@ class ObjectChoiceList extends ChoiceList
                     $values[$i] = $value;
                     unset($choices[$i]);
 
-                    if (0 === count($choices)) {
+                    if (0 === \count($choices)) {
                         break 2;
                     }
                 }
@@ -196,7 +194,7 @@ class ObjectChoiceList extends ChoiceList
      */
     public function getIndicesForChoices(array $choices)
     {
-        @trigger_error('The '.__METHOD__.' method is deprecated since version 2.4 and will be removed in 3.0.', E_USER_DEPRECATED);
+        @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.4 and will be removed in 3.0.', E_USER_DEPRECATED);
 
         if (!$this->valuePath) {
             return parent::getIndicesForChoices($choices);
@@ -208,7 +206,7 @@ class ObjectChoiceList extends ChoiceList
 
         foreach ($choices as $i => $givenChoice) {
             // Ignore non-readable choices
-            if (!is_object($givenChoice) && !is_array($givenChoice)) {
+            if (!\is_object($givenChoice) && !\is_array($givenChoice)) {
                 continue;
             }
 
@@ -219,7 +217,7 @@ class ObjectChoiceList extends ChoiceList
                     $indices[$i] = $j;
                     unset($choices[$i]);
 
-                    if (0 === count($choices)) {
+                    if (0 === \count($choices)) {
                         break 2;
                     }
                 }
@@ -238,7 +236,7 @@ class ObjectChoiceList extends ChoiceList
      *
      * @param mixed $choice The choice to create a value for
      *
-     * @return int|string A unique value without character limitations.
+     * @return int|string A unique value without character limitations
      */
     protected function createValue($choice)
     {
@@ -252,7 +250,7 @@ class ObjectChoiceList extends ChoiceList
     private function extractLabels($choices, array &$labels)
     {
         foreach ($choices as $i => $choice) {
-            if (is_array($choice)) {
+            if (\is_array($choice)) {
                 $labels[$i] = array();
                 $this->extractLabels($choice, $labels[$i]);
             } elseif ($this->labelPath) {
@@ -260,7 +258,7 @@ class ObjectChoiceList extends ChoiceList
             } elseif (method_exists($choice, '__toString')) {
                 $labels[$i] = (string) $choice;
             } else {
-                throw new StringCastException(sprintf('A "__toString()" method was not found on the objects of type "%s" passed to the choice field. To read a custom getter instead, set the argument $labelPath to the desired property path.', get_class($choice)));
+                throw new StringCastException(sprintf('A "__toString()" method was not found on the objects of type "%s" passed to the choice field. To read a custom getter instead, set the argument $labelPath to the desired property path.', \get_class($choice)));
             }
         }
     }

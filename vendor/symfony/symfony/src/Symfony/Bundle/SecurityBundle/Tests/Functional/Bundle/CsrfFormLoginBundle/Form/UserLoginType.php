@@ -14,8 +14,8 @@ namespace Symfony\Bundle\SecurityBundle\Tests\Functional\Bundle\CsrfFormLoginBun
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormError;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Security;
@@ -31,9 +31,6 @@ class UserLoginType extends AbstractType
 {
     private $requestStack;
 
-    /**
-     * @param RequestStack $requestStack A RequestStack instance
-     */
     public function __construct(RequestStack $requestStack)
     {
         $this->requestStack = $requestStack;

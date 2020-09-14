@@ -143,6 +143,14 @@ class HipChatHandler extends SocketHandler
             'color' => $this->getAlertColor($record['level']),
         );
 
+        if (!$this->validateStringLength($dataArray['message'], static::MAXIMUM_MESSAGE_LENGTH)) {
+            if (function_exists('mb_substr')) {
+                $dataArray['message'] = mb_substr($dataArray['message'], 0, static::MAXIMUM_MESSAGE_LENGTH).' [truncated]';
+            } else {
+                $dataArray['message'] = substr($dataArray['message'], 0, static::MAXIMUM_MESSAGE_LENGTH).' [truncated]';
+            }
+        }
+
         // if we are using the legacy API then we need to send some additional information
         if ($this->version == self::API_V1) {
             $dataArray['room_id'] = $this->room;
@@ -211,6 +219,21 @@ class HipChatHandler extends SocketHandler
     protected function write(array $record)
     {
         parent::write($record);
+        $this->finalizeWrite();
+    }
+
+    /**
+     * Finalizes the request by reading some bytes and then closing the socket
+     *
+     * If we do not read some but close the socket too early, hipchat sometimes
+     * drops the request entirely.
+     */
+    protected function finalizeWrite()
+    {
+        $res = $this->getResource();
+        if (is_resource($res)) {
+            @fread($res, 2048);
+        }
         $this->closeSocket();
     }
 

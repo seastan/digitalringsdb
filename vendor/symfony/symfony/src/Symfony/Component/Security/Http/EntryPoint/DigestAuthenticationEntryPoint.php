@@ -11,11 +11,11 @@
 
 namespace Symfony\Component\Security\Http\EntryPoint;
 
+use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\NonceExpiredException;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Request;
-use Psr\Log\LoggerInterface;
 
 /**
  * DigestAuthenticationEntryPoint starts an HTTP Digest authentication.
@@ -69,7 +69,7 @@ class DigestAuthenticationEntryPoint implements AuthenticationEntryPointInterfac
      */
     public function getKey()
     {
-        @trigger_error(__method__.'() is deprecated since version 2.8 and will be removed in 3.0. Use getSecret() instead.', E_USER_DEPRECATED);
+        @trigger_error(__METHOD__.'() is deprecated since Symfony 2.8 and will be removed in 3.0. Use getSecret() instead.', E_USER_DEPRECATED);
 
         return $this->getSecret();
     }

@@ -11,10 +11,11 @@
 
 namespace Symfony\Component\Security\Http\Tests\EntryPoint;
 
-use Symfony\Component\Security\Http\EntryPoint\RetryAuthenticationEntryPoint;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Http\EntryPoint\RetryAuthenticationEntryPoint;
 
-class RetryAuthenticationEntryPointTest extends \PHPUnit_Framework_TestCase
+class RetryAuthenticationEntryPointTest extends TestCase
 {
     /**
      * @dataProvider dataForStart

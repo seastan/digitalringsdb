@@ -11,11 +11,12 @@
 
 namespace Symfony\Component\Form\Tests\Extension\Core\DataMapper;
 
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Form\Extension\Core\DataMapper\PropertyPathMapper;
 use Symfony\Component\Form\FormConfigBuilder;
 use Symfony\Component\Form\FormConfigInterface;
-use Symfony\Component\Form\Extension\Core\DataMapper\PropertyPathMapper;
 
-class PropertyPathMapperTest extends \PHPUnit_Framework_TestCase
+class PropertyPathMapperTest extends TestCase
 {
     /**
      * @var PropertyPathMapper
@@ -34,14 +35,12 @@ class PropertyPathMapperTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->dispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
-        $this->propertyAccessor = $this->getMock('Symfony\Component\PropertyAccess\PropertyAccessorInterface');
+        $this->dispatcher = $this->getMockBuilder('Symfony\Component\EventDispatcher\EventDispatcherInterface')->getMock();
+        $this->propertyAccessor = $this->getMockBuilder('Symfony\Component\PropertyAccess\PropertyAccessorInterface')->getMock();
         $this->mapper = new PropertyPathMapper($this->propertyAccessor);
     }
 
     /**
-     * @param $path
-     *
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
     private function getPropertyPath($path)
@@ -357,5 +356,45 @@ class PropertyPathMapperTest extends \PHPUnit_Framework_TestCase
         $form = $this->getForm($config);
 
         $this->mapper->mapFormsToData(array($form), $car);
+    }
+
+    /**
+     * @dataProvider provideDate
+     */
+    public function testMapFormsToDataDoesNotChangeEqualDateTimeInstance($date)
+    {
+        $article = array();
+        $publishedAt = $date;
+        $article['publishedAt'] = clone $publishedAt;
+        $propertyPath = $this->getPropertyPath('[publishedAt]');
+
+        $this->propertyAccessor->expects($this->once())
+            ->method('getValue')
+            ->willReturn($article['publishedAt'])
+        ;
+        $this->propertyAccessor->expects($this->never())
+            ->method('setValue')
+        ;
+
+        $config = new FormConfigBuilder('publishedAt', \get_class($publishedAt), $this->dispatcher);
+        $config->setByReference(false);
+        $config->setPropertyPath($propertyPath);
+        $config->setData($publishedAt);
+        $form = $this->getForm($config);
+
+        $this->mapper->mapFormsToData(array($form), $article);
+    }
+
+    public function provideDate()
+    {
+        $data = array(
+            '\DateTime' => array(new \DateTime()),
+        );
+
+        if (class_exists('DateTimeImmutable')) {
+            $data['\DateTimeImmutable'] = array(new \DateTimeImmutable());
+        }
+
+        return $data;
     }
 }

@@ -11,6 +11,7 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Test;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ResettableContainerInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -20,7 +21,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-abstract class KernelTestCase extends \PHPUnit_Framework_TestCase
+abstract class KernelTestCase extends TestCase
 {
     protected static $class;
 
@@ -47,8 +48,8 @@ abstract class KernelTestCase extends \PHPUnit_Framework_TestCase
 
         $dir = static::getPhpUnitCliConfigArgument();
         if (null === $dir &&
-            (is_file(getcwd().DIRECTORY_SEPARATOR.'phpunit.xml') ||
-            is_file(getcwd().DIRECTORY_SEPARATOR.'phpunit.xml.dist'))) {
+            (is_file(getcwd().\DIRECTORY_SEPARATOR.'phpunit.xml') ||
+            is_file(getcwd().\DIRECTORY_SEPARATOR.'phpunit.xml.dist'))) {
             $dir = getcwd();
         }
 
@@ -58,7 +59,7 @@ abstract class KernelTestCase extends \PHPUnit_Framework_TestCase
         }
 
         if (!is_dir($dir)) {
-            $dir = dirname($dir);
+            $dir = \dirname($dir);
         }
 
         return $dir;
@@ -77,15 +78,15 @@ abstract class KernelTestCase extends \PHPUnit_Framework_TestCase
         $dir = null;
         $reversedArgs = array_reverse($_SERVER['argv']);
         foreach ($reversedArgs as $argIndex => $testArg) {
-            if (preg_match('/^-[^ \-]*c$/', $testArg) || $testArg === '--configuration') {
+            if (preg_match('/^-[^ \-]*c$/', $testArg) || '--configuration' === $testArg) {
                 $dir = realpath($reversedArgs[$argIndex - 1]);
                 break;
             } elseif (0 === strpos($testArg, '--configuration=')) {
-                $argPath = substr($testArg, strlen('--configuration='));
+                $argPath = substr($testArg, \strlen('--configuration='));
                 $dir = realpath($argPath);
                 break;
             } elseif (0 === strpos($testArg, '-c')) {
-                $argPath = substr($testArg, strlen('-c'));
+                $argPath = substr($testArg, \strlen('-c'));
                 $dir = realpath($argPath);
                 break;
             }
@@ -105,8 +106,8 @@ abstract class KernelTestCase extends \PHPUnit_Framework_TestCase
      */
     protected static function getKernelClass()
     {
-        if (isset($_SERVER['KERNEL_DIR'])) {
-            $dir = $_SERVER['KERNEL_DIR'];
+        if (isset($_SERVER['KERNEL_DIR']) || isset($_ENV['KERNEL_DIR'])) {
+            $dir = isset($_SERVER['KERNEL_DIR']) ? $_SERVER['KERNEL_DIR'] : $_ENV['KERNEL_DIR'];
 
             if (!is_dir($dir)) {
                 $phpUnitDir = static::getPhpUnitXmlDir();
@@ -121,7 +122,7 @@ abstract class KernelTestCase extends \PHPUnit_Framework_TestCase
         $finder = new Finder();
         $finder->name('*Kernel.php')->depth(0)->in($dir);
         $results = iterator_to_array($finder);
-        if (!count($results)) {
+        if (!\count($results)) {
             throw new \RuntimeException('Either set KERNEL_DIR in your phpunit.xml according to https://symfony.com/doc/current/book/testing.html#your-first-functional-test or override the WebTestCase::createKernel() method.');
         }
 
@@ -135,8 +136,6 @@ abstract class KernelTestCase extends \PHPUnit_Framework_TestCase
 
     /**
      * Boots the Kernel for this test.
-     *
-     * @param array $options
      */
     protected static function bootKernel(array $options = array())
     {
@@ -153,8 +152,6 @@ abstract class KernelTestCase extends \PHPUnit_Framework_TestCase
      *
      *  * environment
      *  * debug
-     *
-     * @param array $options An array of options
      *
      * @return KernelInterface A KernelInterface instance
      */

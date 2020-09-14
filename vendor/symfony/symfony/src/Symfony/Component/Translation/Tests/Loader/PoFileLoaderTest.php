@@ -11,10 +11,11 @@
 
 namespace Symfony\Component\Translation\Tests\Loader;
 
-use Symfony\Component\Translation\Loader\PoFileLoader;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\Translation\Loader\PoFileLoader;
 
-class PoFileLoaderTest extends \PHPUnit_Framework_TestCase
+class PoFileLoaderTest extends TestCase
 {
     public function testLoad()
     {
@@ -92,5 +93,17 @@ class PoFileLoaderTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('escaped "foos"', $messages);
         $this->assertEquals('escaped "bar"', $messages['escaped "foo"']);
         $this->assertEquals('escaped "bar"|escaped "bars"', $messages['escaped "foos"']);
+    }
+
+    public function testSkipFuzzyTranslations()
+    {
+        $loader = new PoFileLoader();
+        $resource = __DIR__.'/../fixtures/fuzzy-translations.po';
+        $catalogue = $loader->load($resource, 'en', 'domain1');
+
+        $messages = $catalogue->all('domain1');
+        $this->assertArrayHasKey('foo1', $messages);
+        $this->assertArrayNotHasKey('foo2', $messages);
+        $this->assertArrayHasKey('foo3', $messages);
     }
 }

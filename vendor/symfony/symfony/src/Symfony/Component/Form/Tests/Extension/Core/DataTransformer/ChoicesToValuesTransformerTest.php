@@ -11,10 +11,11 @@
 
 namespace Symfony\Component\Form\Tests\Extension\Core\DataTransformer;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\ChoiceList\ArrayChoiceList;
 use Symfony\Component\Form\Extension\Core\DataTransformer\ChoicesToValuesTransformer;
 
-class ChoicesToValuesTransformerTest extends \PHPUnit_Framework_TestCase
+class ChoicesToValuesTransformerTest extends TestCase
 {
     protected $transformer;
     protected $transformerWithNull;
@@ -68,7 +69,7 @@ class ChoicesToValuesTransformerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame($out, $this->transformer->reverseTransform($in));
         // values are expected to be valid choices and stay the same
-        $inWithNull = array('0','1','2','3');
+        $inWithNull = array('0', '1', '2', '3');
         $out[] = null;
 
         $this->assertSame($out, $this->transformerWithNull->reverseTransform($inWithNull));

@@ -11,11 +11,14 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Dumper;
 
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Dumper\YamlDumper;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Yaml\Yaml;
 
-class YamlDumperTest extends \PHPUnit_Framework_TestCase
+class YamlDumperTest extends TestCase
 {
     protected static $fixturesPath;
 
@@ -46,7 +49,7 @@ class YamlDumperTest extends \PHPUnit_Framework_TestCase
         $container = include self::$fixturesPath.'/containers/legacy-container9.php';
         $dumper = new YamlDumper($container);
 
-        $this->assertEquals(str_replace('%path%', self::$fixturesPath.DIRECTORY_SEPARATOR.'includes'.DIRECTORY_SEPARATOR, file_get_contents(self::$fixturesPath.'/yaml/legacy-services9.yml')), $dumper->dump(), '->dump() dumps services');
+        $this->assertEquals(str_replace('%path%', self::$fixturesPath.\DIRECTORY_SEPARATOR.'includes'.\DIRECTORY_SEPARATOR, file_get_contents(self::$fixturesPath.'/yaml/legacy-services9.yml')), $dumper->dump(), '->dump() dumps services');
 
         $dumper = new YamlDumper($container = new ContainerBuilder());
         $container->register('foo', 'FooClass')->addArgument(new \stdClass());
@@ -63,7 +66,7 @@ class YamlDumperTest extends \PHPUnit_Framework_TestCase
     {
         $container = include self::$fixturesPath.'/containers/container9.php';
         $dumper = new YamlDumper($container);
-        $this->assertEqualYamlStructure(str_replace('%path%', self::$fixturesPath.DIRECTORY_SEPARATOR.'includes'.DIRECTORY_SEPARATOR, file_get_contents(self::$fixturesPath.'/yaml/services9.yml')), $dumper->dump(), '->dump() dumps services');
+        $this->assertEqualYamlStructure(str_replace('%path%', self::$fixturesPath.\DIRECTORY_SEPARATOR.'includes'.\DIRECTORY_SEPARATOR, file_get_contents(self::$fixturesPath.'/yaml/services9.yml')), $dumper->dump(), '->dump() dumps services');
 
         $dumper = new YamlDumper($container = new ContainerBuilder());
         $container->register('foo', 'FooClass')->addArgument(new \stdClass());
@@ -81,6 +84,16 @@ class YamlDumperTest extends \PHPUnit_Framework_TestCase
         $container = include self::$fixturesPath.'/containers/container24.php';
         $dumper = new YamlDumper($container);
         $this->assertStringEqualsFile(self::$fixturesPath.'/yaml/services24.yml', $dumper->dump());
+    }
+
+    public function testDumpLoad()
+    {
+        $container = new ContainerBuilder();
+        $loader = new YamlFileLoader($container, new FileLocator(self::$fixturesPath.'/yaml'));
+        $loader->load('services_dump_load.yml');
+
+        $dumper = new YamlDumper($container);
+        $this->assertStringEqualsFile(self::$fixturesPath.'/yaml/services_dump_load.yml', $dumper->dump());
     }
 
     private function assertEqualYamlStructure($yaml, $expected, $message = '')

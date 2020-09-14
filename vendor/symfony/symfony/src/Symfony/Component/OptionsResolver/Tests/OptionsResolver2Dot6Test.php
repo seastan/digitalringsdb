@@ -11,11 +11,13 @@
 
 namespace Symfony\Component\OptionsResolver\Tests;
 
+use PHPUnit\Framework\Assert;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
+class OptionsResolver2Dot6Test extends TestCase
 {
     /**
      * @var OptionsResolver
@@ -26,10 +28,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
     {
         $this->resolver = new OptionsResolver();
     }
-
-    ////////////////////////////////////////////////////////////////////////////
-    // resolve()
-    ////////////////////////////////////////////////////////////////////////////
 
     /**
      * @expectedException \Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException
@@ -66,10 +64,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
 
         $this->resolver->resolve();
     }
-
-    ////////////////////////////////////////////////////////////////////////////
-    // setDefault()/hasDefault()
-    ////////////////////////////////////////////////////////////////////////////
 
     public function testSetDefaultReturnsThis()
     {
@@ -113,10 +107,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->resolver->hasDefault('foo'));
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // lazy setDefault()
-    ////////////////////////////////////////////////////////////////////////////
-
     public function testSetLazyReturnsThis()
     {
         $this->assertSame($this->resolver, $this->resolver->setDefault('foo', function (Options $options) {}));
@@ -134,7 +124,7 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
     public function testClosureWithoutTypeHintNotInvoked()
     {
         $closure = function ($options) {
-            \PHPUnit_Framework_Assert::fail('Should not be called');
+            Assert::fail('Should not be called');
         };
 
         $this->resolver->setDefault('foo', $closure);
@@ -145,7 +135,7 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
     public function testClosureWithoutParametersNotInvoked()
     {
         $closure = function () {
-            \PHPUnit_Framework_Assert::fail('Should not be called');
+            Assert::fail('Should not be called');
         };
 
         $this->resolver->setDefault('foo', $closure);
@@ -160,7 +150,7 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
 
         // defined by subclass
         $this->resolver->setDefault('foo', function (Options $options, $previousValue) {
-            \PHPUnit_Framework_Assert::assertEquals('bar', $previousValue);
+            Assert::assertEquals('bar', $previousValue);
 
             return 'lazy';
         });
@@ -177,7 +167,7 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
 
         // defined by subclass
         $this->resolver->setDefault('foo', function (Options $options, $previousValue) {
-            \PHPUnit_Framework_Assert::assertEquals('bar', $previousValue);
+            Assert::assertEquals('bar', $previousValue);
 
             return 'lazy';
         });
@@ -189,7 +179,7 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
     {
         // defined by superclass
         $this->resolver->setDefault('foo', function () {
-            \PHPUnit_Framework_Assert::fail('Should not be called');
+            Assert::fail('Should not be called');
         });
 
         // defined by subclass, no $previousValue argument defined!
@@ -203,7 +193,7 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
     public function testOverwrittenLazyOptionNotEvaluated()
     {
         $this->resolver->setDefault('foo', function (Options $options) {
-            \PHPUnit_Framework_Assert::fail('Should not be called');
+            Assert::fail('Should not be called');
         });
 
         $this->resolver->setDefault('foo', 'bar');
@@ -216,23 +206,19 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $calls = 0;
 
         $this->resolver->setDefault('lazy1', function (Options $options) use (&$calls) {
-            \PHPUnit_Framework_Assert::assertSame(1, ++$calls);
+            Assert::assertSame(1, ++$calls);
 
             $options['lazy2'];
         });
 
         $this->resolver->setDefault('lazy2', function (Options $options) use (&$calls) {
-            \PHPUnit_Framework_Assert::assertSame(2, ++$calls);
+            Assert::assertSame(2, ++$calls);
         });
 
         $this->resolver->resolve();
 
         $this->assertSame(2, $calls);
     }
-
-    ////////////////////////////////////////////////////////////////////////////
-    // setRequired()/isRequired()/getRequiredOptions()
-    ////////////////////////////////////////////////////////////////////////////
 
     public function testSetRequiredReturnsThis()
     {
@@ -328,10 +314,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->assertSame(array('foo', 'bar'), $this->resolver->getRequiredOptions());
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // isMissing()/getMissingOptions()
-    ////////////////////////////////////////////////////////////////////////////
-
     public function testIsMissingIfNotSet()
     {
         $this->assertFalse($this->resolver->isMissing('foo'));
@@ -370,10 +352,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(array('bar'), $this->resolver->getMissingOptions());
     }
-
-    ////////////////////////////////////////////////////////////////////////////
-    // setDefined()/isDefined()/getDefinedOptions()
-    ////////////////////////////////////////////////////////////////////////////
 
     /**
      * @expectedException \Symfony\Component\OptionsResolver\Exception\AccessException
@@ -472,10 +450,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->resolver->isDefined('foo'));
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // setAllowedTypes()
-    ////////////////////////////////////////////////////////////////////////////
-
     /**
      * @expectedException \Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException
      */
@@ -505,7 +479,14 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
     {
         $this->resolver->setDefined('option');
         $this->resolver->setAllowedTypes('option', $allowedType);
-        $this->setExpectedException('Symfony\Component\OptionsResolver\Exception\InvalidOptionsException', $exceptionMessage);
+
+        if (method_exists($this, 'expectException')) {
+            $this->expectException('Symfony\Component\OptionsResolver\Exception\InvalidOptionsException');
+            $this->expectExceptionMessage($exceptionMessage);
+        } else {
+            $this->setExpectedException('Symfony\Component\OptionsResolver\Exception\InvalidOptionsException', $exceptionMessage);
+        }
+
         $this->resolver->resolve(array('option' => $actualType));
     }
 
@@ -558,10 +539,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
 
         $this->assertNotEmpty($this->resolver->resolve());
     }
-
-    ////////////////////////////////////////////////////////////////////////////
-    // addAllowedTypes()
-    ////////////////////////////////////////////////////////////////////////////
 
     /**
      * @expectedException \Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException
@@ -644,10 +621,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
 
         $this->assertNotEmpty($this->resolver->resolve());
     }
-
-    ////////////////////////////////////////////////////////////////////////////
-    // setAllowedValues()
-    ////////////////////////////////////////////////////////////////////////////
 
     /**
      * @expectedException \Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException
@@ -800,10 +773,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array('foo' => 'bar'), $this->resolver->resolve());
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // addAllowedValues()
-    ////////////////////////////////////////////////////////////////////////////
-
     /**
      * @expectedException \Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException
      */
@@ -920,10 +889,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array('foo' => 'bar'), $this->resolver->resolve());
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // setNormalizer()
-    ////////////////////////////////////////////////////////////////////////////
-
     public function testSetNormalizerReturnsThis()
     {
         $this->resolver->setDefault('foo', 'bar');
@@ -996,7 +961,7 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->resolver->setAllowedTypes('foo', 'int');
 
         $this->resolver->setNormalizer('foo', function () {
-            \PHPUnit_Framework_Assert::fail('Should not be called.');
+            Assert::fail('Should not be called.');
         });
 
         $this->resolver->resolve();
@@ -1012,7 +977,7 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->resolver->setAllowedValues('foo', 'baz');
 
         $this->resolver->setNormalizer('foo', function () {
-            \PHPUnit_Framework_Assert::fail('Should not be called.');
+            Assert::fail('Should not be called.');
         });
 
         $this->resolver->resolve();
@@ -1024,8 +989,8 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->resolver->setDefault('norm', 'baz');
 
         $this->resolver->setNormalizer('norm', function (Options $options) {
-            /* @var \PHPUnit_Framework_TestCase $test */
-            \PHPUnit_Framework_Assert::assertSame('bar', $options['default']);
+            /* @var TestCase $test */
+            Assert::assertSame('bar', $options['default']);
 
             return 'normalized';
         });
@@ -1044,8 +1009,8 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->resolver->setDefault('norm', 'baz');
 
         $this->resolver->setNormalizer('norm', function (Options $options) {
-            /* @var \PHPUnit_Framework_TestCase $test */
-            \PHPUnit_Framework_Assert::assertEquals('bar', $options['lazy']);
+            /* @var TestCase $test */
+            Assert::assertEquals('bar', $options['lazy']);
 
             return 'normalized';
         });
@@ -1093,7 +1058,7 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->resolver->resolve();
     }
 
-    public function testCatchedExceptionFromNormalizerDoesNotCrashOptionResolver()
+    public function testCaughtExceptionFromNormalizerDoesNotCrashOptionResolver()
     {
         $throw = true;
 
@@ -1107,7 +1072,7 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
             }
         });
 
-        $this->resolver->setNormalizer('thrower', function (Options $options) use (&$throw) {
+        $this->resolver->setNormalizer('thrower', function () use (&$throw) {
             if ($throw) {
                 $throw = false;
                 throw new \UnexpectedValueException('throwing');
@@ -1116,10 +1081,10 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
             return true;
         });
 
-        $this->resolver->resolve();
+        $this->assertSame(array('catcher' => false, 'thrower' => true), $this->resolver->resolve());
     }
 
-    public function testCatchedExceptionFromLazyDoesNotCrashOptionResolver()
+    public function testCaughtExceptionFromLazyDoesNotCrashOptionResolver()
     {
         $throw = true;
 
@@ -1140,7 +1105,7 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
             return true;
         });
 
-        $this->resolver->resolve();
+        $this->assertSame(array('catcher' => false, 'thrower' => true), $this->resolver->resolve());
     }
 
     public function testInvokeEachNormalizerOnlyOnce()
@@ -1151,12 +1116,12 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->resolver->setDefault('norm2', 'baz');
 
         $this->resolver->setNormalizer('norm1', function ($options) use (&$calls) {
-            \PHPUnit_Framework_Assert::assertSame(1, ++$calls);
+            Assert::assertSame(1, ++$calls);
 
             $options['norm2'];
         });
         $this->resolver->setNormalizer('norm2', function () use (&$calls) {
-            \PHPUnit_Framework_Assert::assertSame(2, ++$calls);
+            Assert::assertSame(2, ++$calls);
         });
 
         $this->resolver->resolve();
@@ -1169,15 +1134,11 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->resolver->setDefined('norm');
 
         $this->resolver->setNormalizer('norm', function () {
-            \PHPUnit_Framework_Assert::fail('Should not be called.');
+            Assert::fail('Should not be called.');
         });
 
         $this->assertEmpty($this->resolver->resolve());
     }
-
-    ////////////////////////////////////////////////////////////////////////////
-    // setDefaults()
-    ////////////////////////////////////////////////////////////////////////////
 
     public function testSetDefaultsReturnsThis()
     {
@@ -1212,10 +1173,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
 
         $this->resolver->resolve();
     }
-
-    ////////////////////////////////////////////////////////////////////////////
-    // remove()
-    ////////////////////////////////////////////////////////////////////////////
 
     public function testRemoveReturnsThis()
     {
@@ -1305,10 +1262,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->assertNotNull($this->resolver->remove('foo'));
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // clear()
-    ////////////////////////////////////////////////////////////////////////////
-
     public function testClearReturnsThis()
     {
         $this->assertSame($this->resolver, $this->resolver->clear());
@@ -1395,10 +1348,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($this->resolver->resolve());
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // ArrayAccess
-    ////////////////////////////////////////////////////////////////////////////
-
     public function testArrayAccess()
     {
         $this->resolver->setDefault('default1', 0);
@@ -1410,17 +1359,17 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         });
 
         $this->resolver->setDefault('lazy2', function (Options $options) {
-            \PHPUnit_Framework_Assert::assertTrue(isset($options['default1']));
-            \PHPUnit_Framework_Assert::assertTrue(isset($options['default2']));
-            \PHPUnit_Framework_Assert::assertTrue(isset($options['required']));
-            \PHPUnit_Framework_Assert::assertTrue(isset($options['lazy1']));
-            \PHPUnit_Framework_Assert::assertTrue(isset($options['lazy2']));
-            \PHPUnit_Framework_Assert::assertFalse(isset($options['defined']));
+            Assert::assertArrayHasKey('default1', $options);
+            Assert::assertArrayHasKey('default2', $options);
+            Assert::assertArrayHasKey('required', $options);
+            Assert::assertArrayHasKey('lazy1', $options);
+            Assert::assertArrayHasKey('lazy2', $options);
+            Assert::assertArrayNotHasKey('defined', $options);
 
-            \PHPUnit_Framework_Assert::assertSame(0, $options['default1']);
-            \PHPUnit_Framework_Assert::assertSame(42, $options['default2']);
-            \PHPUnit_Framework_Assert::assertSame('value', $options['required']);
-            \PHPUnit_Framework_Assert::assertSame('lazy', $options['lazy1']);
+            Assert::assertSame(0, $options['default1']);
+            Assert::assertSame(42, $options['default2']);
+            Assert::assertSame('value', $options['required']);
+            Assert::assertSame('lazy', $options['lazy1']);
 
             // Obviously $options['lazy'] and $options['defined'] cannot be
             // accessed
@@ -1513,10 +1462,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->resolver->resolve();
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // Countable
-    ////////////////////////////////////////////////////////////////////////////
-
     public function testCount()
     {
         $this->resolver->setDefault('default', 0);
@@ -1525,7 +1470,7 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->resolver->setDefault('lazy1', function () {});
 
         $this->resolver->setDefault('lazy2', function (Options $options) {
-            \PHPUnit_Framework_Assert::assertCount(4, $options);
+            Assert::assertCount(4, $options);
         });
 
         $this->assertCount(4, $this->resolver->resolve(array('required' => 'value')));
@@ -1545,6 +1490,6 @@ class OptionsResolver2Dot6Test extends \PHPUnit_Framework_TestCase
         $this->resolver->setDefined('bar');
         $this->resolver->setDefault('lazy1', function () {});
 
-        count($this->resolver);
+        \count($this->resolver);
     }
 }

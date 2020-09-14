@@ -19,20 +19,12 @@ use Symfony\Component\Validator\ConstraintViolationInterface;
 /**
  * Default implementation of {@link FormDataExtractorInterface}.
  *
- * @since  2.4
- *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 class FormDataExtractor implements FormDataExtractorInterface
 {
-    /**
-     * @var ValueExporter
-     */
     private $valueExporter;
 
-    /**
-     * Constructs a new data extractor.
-     */
     public function __construct(ValueExporter $valueExporter = null)
     {
         $this->valueExporter = $valueExporter ?: new ValueExporter();
@@ -47,7 +39,7 @@ class FormDataExtractor implements FormDataExtractorInterface
             'id' => $this->buildId($form),
             'name' => $form->getName(),
             'type' => $form->getConfig()->getType()->getName(),
-            'type_class' => get_class($form->getConfig()->getType()->getInnerType()),
+            'type_class' => \get_class($form->getConfig()->getType()->getInnerType()),
             'synchronized' => $this->valueExporter->exportValue($form->isSynchronized()),
             'passed_options' => array(),
             'resolved_options' => array(),
@@ -113,7 +105,7 @@ class FormDataExtractor implements FormDataExtractorInterface
         foreach ($form->getErrors() as $error) {
             $errorData = array(
                 'message' => $error->getMessage(),
-                'origin' => is_object($error->getOrigin())
+                'origin' => \is_object($error->getOrigin())
                     ? spl_object_hash($error->getOrigin())
                     : null,
                 'trace' => array(),
@@ -124,7 +116,7 @@ class FormDataExtractor implements FormDataExtractorInterface
             while (null !== $cause) {
                 if ($cause instanceof ConstraintViolationInterface) {
                     $errorData['trace'][] = array(
-                        'class' => $this->valueExporter->exportValue(get_class($cause)),
+                        'class' => $this->valueExporter->exportValue(\get_class($cause)),
                         'root' => $this->valueExporter->exportValue($cause->getRoot()),
                         'path' => $this->valueExporter->exportValue($cause->getPropertyPath()),
                         'value' => $this->valueExporter->exportValue($cause->getInvalidValue()),
@@ -137,7 +129,7 @@ class FormDataExtractor implements FormDataExtractorInterface
 
                 if ($cause instanceof \Exception) {
                     $errorData['trace'][] = array(
-                        'class' => $this->valueExporter->exportValue(get_class($cause)),
+                        'class' => $this->valueExporter->exportValue(\get_class($cause)),
                         'message' => $this->valueExporter->exportValue($cause->getMessage()),
                     );
 
@@ -187,8 +179,6 @@ class FormDataExtractor implements FormDataExtractorInterface
 
     /**
      * Recursively builds an HTML ID for a form.
-     *
-     * @param FormInterface $form The form
      *
      * @return string The HTML ID
      */

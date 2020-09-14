@@ -11,21 +11,21 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Controller;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Symfony\Component\DependencyInjection\ContainerAware;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Symfony\Component\Security\Csrf\CsrfToken;
-use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormBuilder;
+use Symfony\Component\Form\FormTypeInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Doctrine\Bundle\DoctrineBundle\Registry;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Csrf\CsrfToken;
 
 /**
  * Controller is a simple implementation of a Controller.
@@ -315,7 +315,7 @@ class Controller extends ContainerAware
      */
     public function getRequest()
     {
-        @trigger_error('The '.__METHOD__.' method is deprecated since version 2.4 and will be removed in 3.0. The only reliable way to get the "Request" object is to inject it in the action method.', E_USER_DEPRECATED);
+        @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.4 and will be removed in 3.0. The only reliable way to get the "Request" object is to inject it in the action method.', E_USER_DEPRECATED);
 
         return $this->container->get('request_stack')->getCurrentRequest();
     }
@@ -355,7 +355,7 @@ class Controller extends ContainerAware
             return;
         }
 
-        if (!is_object($user = $token->getUser())) {
+        if (!\is_object($user = $token->getUser())) {
             // e.g. anonymous authentication
             return;
         }

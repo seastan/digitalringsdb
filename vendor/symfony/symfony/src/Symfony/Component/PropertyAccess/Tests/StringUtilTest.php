@@ -11,9 +11,10 @@
 
 namespace Symfony\Component\PropertyAccess\Tests;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\PropertyAccess\StringUtil;
 
-class StringUtilTest extends \PHPUnit_Framework_TestCase
+class StringUtilTest extends TestCase
 {
     public function singularifyProvider()
     {
@@ -53,6 +54,7 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
             array('children', 'child'),
             array('circuses', array('circus', 'circuse', 'circusis')),
             array('cliffs', 'cliff'),
+            array('committee', 'committee'),
             array('crises', array('cris', 'crise', 'crisis')),
             array('criteria', array('criterion', 'criterium')),
             array('cups', 'cup'),
@@ -107,6 +109,8 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
             array('objectives', 'objective'),
             array('oxen', 'ox'),
             array('parties', 'party'),
+            array('people', 'person'),
+            array('persons', 'person'),
             array('phenomena', array('phenomenon', 'phenomenum')),
             array('photos', 'photo'),
             array('pianos', 'piano'),
@@ -157,9 +161,9 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
     public function testSingularify($plural, $singular)
     {
         $single = StringUtil::singularify($plural);
-        if (is_string($singular) && is_array($single)) {
+        if (\is_string($singular) && \is_array($single)) {
             $this->fail("--- Expected\n`string`: ".$singular."\n+++ Actual\n`array`: ".implode(', ', $single));
-        } elseif (is_array($singular) && is_string($single)) {
+        } elseif (\is_array($singular) && \is_string($single)) {
             $this->fail("--- Expected\n`array`: ".implode(', ', $singular)."\n+++ Actual\n`string`: ".$single);
         }
 

@@ -11,19 +11,20 @@
 
 namespace Symfony\Bundle\WebProfilerBundle\Tests\Controller;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\WebProfilerBundle\Controller\ProfilerController;
-use Symfony\Component\HttpKernel\Profiler\Profile;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Profiler\Profile;
 
-class ProfilerControllerTest extends \PHPUnit_Framework_TestCase
+class ProfilerControllerTest extends TestCase
 {
     /**
      * @dataProvider getEmptyTokenCases
      */
     public function testEmptyToken($token)
     {
-        $urlGenerator = $this->getMock('Symfony\Component\Routing\Generator\UrlGeneratorInterface');
-        $twig = $this->getMockBuilder('Twig_Environment')->disableOriginalConstructor()->getMock();
+        $urlGenerator = $this->getMockBuilder('Symfony\Component\Routing\Generator\UrlGeneratorInterface')->getMock();
+        $twig = $this->getMockBuilder('Twig\Environment')->disableOriginalConstructor()->getMock();
         $profiler = $this
             ->getMockBuilder('Symfony\Component\HttpKernel\Profiler\Profiler')
             ->disableOriginalConstructor()
@@ -46,8 +47,8 @@ class ProfilerControllerTest extends \PHPUnit_Framework_TestCase
 
     public function testReturns404onTokenNotFound()
     {
-        $urlGenerator = $this->getMock('Symfony\Component\Routing\Generator\UrlGeneratorInterface');
-        $twig = $this->getMockBuilder('Twig_Environment')->disableOriginalConstructor()->getMock();
+        $urlGenerator = $this->getMockBuilder('Symfony\Component\Routing\Generator\UrlGeneratorInterface')->getMock();
+        $twig = $this->getMockBuilder('Twig\Environment')->disableOriginalConstructor()->getMock();
         $profiler = $this
             ->getMockBuilder('Symfony\Component\HttpKernel\Profiler\Profiler')
             ->disableOriginalConstructor()
@@ -74,8 +75,8 @@ class ProfilerControllerTest extends \PHPUnit_Framework_TestCase
 
     public function testSearchResult()
     {
-        $urlGenerator = $this->getMock('Symfony\Component\Routing\Generator\UrlGeneratorInterface');
-        $twig = $this->getMockBuilder('Twig_Environment')->disableOriginalConstructor()->getMock();
+        $urlGenerator = $this->getMockBuilder('Symfony\Component\Routing\Generator\UrlGeneratorInterface')->getMock();
+        $twig = $this->getMockBuilder('Twig\Environment')->disableOriginalConstructor()->getMock();
         $profiler = $this
             ->getMockBuilder('Symfony\Component\HttpKernel\Profiler\Profiler')
             ->disableOriginalConstructor()

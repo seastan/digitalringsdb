@@ -11,9 +11,10 @@
 
 namespace Symfony\Component\Form\Tests\Util;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\Util\StringUtil;
 
-class StringUtilTest extends \PHPUnit_Framework_TestCase
+class StringUtilTest extends TestCase
 {
     public function testTrim()
     {
@@ -34,7 +35,7 @@ class StringUtilTest extends \PHPUnit_Framework_TestCase
 
         // Convert UCS-2BE to UTF-8
         $symbol = mb_convert_encoding($binary, 'UTF-8', 'UCS-2BE');
-        $symbol = $symbol."ab\ncd".$symbol;
+        $symbol .= "ab\ncd".$symbol;
 
         $this->assertSame("ab\ncd", StringUtil::trim($symbol));
     }

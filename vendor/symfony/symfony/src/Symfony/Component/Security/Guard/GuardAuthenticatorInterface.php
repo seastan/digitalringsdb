@@ -40,14 +40,18 @@ interface GuardAuthenticatorInterface extends AuthenticationEntryPointInterface
      *
      * For example, for a form login, you might:
      *
-     *      return array(
-     *          'username' => $request->request->get('_username'),
-     *          'password' => $request->request->get('_password'),
-     *      );
+     *     if ($request->request->has('_username')) {
+     *         return array(
+     *             'username' => $request->request->get('_username'),
+     *             'password' => $request->request->get('_password'),
+     *         );
+     *     } else {
+     *         return;
+     *     }
      *
      * Or for an API token that's on a header, you might use:
      *
-     *      return array('api_key' => $request->headers->get('X-API-TOKEN'));
+     *     return array('api_key' => $request->headers->get('X-API-TOKEN'));
      *
      * @param Request $request
      *
@@ -83,7 +87,7 @@ interface GuardAuthenticatorInterface extends AuthenticationEntryPointInterface
      *
      * @param mixed         $credentials
      * @param UserInterface $user
-     * 
+     *
      * @return bool
      *
      * @throws AuthenticationException
@@ -149,6 +153,7 @@ interface GuardAuthenticatorInterface extends AuthenticationEntryPointInterface
      *      done by having a _remember_me checkbox in your form, but
      *      can be configured by the "always_remember_me" and "remember_me_parameter"
      *      parameters under the "remember_me" firewall key
+     *  D) The onAuthenticationSuccess method returns a Response object
      *
      * @return bool
      */

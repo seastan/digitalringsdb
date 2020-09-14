@@ -16,6 +16,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @Entity
@@ -41,6 +42,16 @@ class DoctrineDummy
     public $bar;
 
     /**
+     * @ManyToMany(targetEntity="DoctrineRelation", indexBy="rguid")
+     */
+    protected $indexedBar;
+
+    /**
+     * @OneToMany(targetEntity="DoctrineRelation", mappedBy="foo", indexBy="foo")
+     */
+    protected $indexedFoo;
+
+    /**
      * @Column(type="guid")
      */
     protected $guid;
@@ -61,6 +72,16 @@ class DoctrineDummy
     private $simpleArray;
 
     /**
+     * @Column(type="float")
+     */
+    private $float;
+
+    /**
+     * @Column(type="decimal", precision=10, scale=2)
+     */
+    private $decimal;
+
+    /**
      * @Column(type="boolean")
      */
     private $bool;
@@ -69,6 +90,16 @@ class DoctrineDummy
      * @Column(type="binary")
      */
     private $binary;
+
+    /**
+     * @Column(type="custom_foo")
+     */
+    private $customFoo;
+
+    /**
+     * @Column(type="bigint")
+     */
+    private $bigint;
 
     public $notMapped;
 }

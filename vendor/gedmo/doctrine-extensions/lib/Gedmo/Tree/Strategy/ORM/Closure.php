@@ -3,8 +3,8 @@
 namespace Gedmo\Tree\Strategy\ORM;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Version;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Common\Persistence\ObjectManager;
 use Gedmo\Tree\Strategy;
@@ -170,7 +170,7 @@ class Closure implements Strategy
      */
     public function processPrePersist($em, $node)
     {
-        $this->pendingChildNodeInserts[spl_object_hash($node)] = $node;
+        $this->pendingChildNodeInserts[spl_object_hash($em)][spl_object_hash($node)] = $node;
     }
 
     /**
@@ -237,8 +237,9 @@ class Closure implements Strategy
     public function processPostPersist($em, $entity, AdapterInterface $ea)
     {
         $uow = $em->getUnitOfWork();
+        $emHash = spl_object_hash($em);
 
-        while ($node = array_shift($this->pendingChildNodeInserts)) {
+        while ($node = array_shift($this->pendingChildNodeInserts[$emHash])) {
             $meta = $em->getClassMetadata(get_class($node));
             $config = $this->listener->getConfiguration($em, $meta->name);
 
@@ -254,9 +255,6 @@ class Closure implements Strategy
             $descendantColumnName = $this->getJoinColumnFieldName($em->getClassMetadata($config['closure'])->getAssociationMapping('descendant'));
             $depthColumnName = $em->getClassMetadata($config['closure'])->getColumnName('depth');
 
-            $referenceMapping = $em->getClassMetadata($config['closure'])->getAssociationMapping('ancestor');
-            $referenceId = $referenceMapping['sourceToTargetKeyColumns'][$ancestorColumnName];
-            
             $entries = array(
                 array(
                     $ancestorColumnName => $nodeId,
@@ -275,7 +273,7 @@ class Closure implements Strategy
 
                 foreach ($ancestors as $ancestor) {
                     $entries[] = array(
-                        $ancestorColumnName => $ancestor['ancestor'][$referenceId],
+                        $ancestorColumnName => $ancestor['ancestor'][$identifier],
                         $descendantColumnName => $nodeId,
                         $depthColumnName => $ancestor['depth'] + 1,
                     );
@@ -348,7 +346,7 @@ class Closure implements Strategy
             $sql .= 'GROUP BY c.descendant';
 
             $levelsAssoc = $em->getConnection()->executeQuery($sql, array(array_keys($this->pendingNodesLevelProcess)), array($type))->fetchAll(\PDO::FETCH_NUM);
-            
+
             //create key pair array with resultset
             $levels = array();
             foreach( $levelsAssoc as $level )
@@ -405,11 +403,11 @@ class Closure implements Strategy
     /**
      * Update node and closures
      *
-     * @param EntityManager $em
+     * @param EntityManagerInterface $em
      * @param object        $node
      * @param object        $oldParent
      */
-    public function updateNode(EntityManager $em, $node, $oldParent)
+    public function updateNode(EntityManagerInterface $em, $node, $oldParent)
     {
         $wrapped = AbstractWrapper::wrap($node, $em);
         $meta = $wrapped->getMetadata();
@@ -437,16 +435,13 @@ class Closure implements Strategy
             $subQuery .= " JOIN {$table} c2 ON c1.descendant = c2.descendant";
             $subQuery .= " WHERE c1.ancestor = :nodeId AND c2.depth > c1.depth";
 
-            $ids = $conn->fetchAll($subQuery, compact('nodeId'));
-            if ($ids) {
-                $ids = array_map(function ($el) {
-                    return $el['id'];
-                }, $ids);
-            }
-            // using subquery directly, sqlite acts unfriendly
-            $query = "DELETE FROM {$table} WHERE id IN (".implode(', ', $ids).")";
-            if (!$conn->executeQuery($query)) {
-                throw new RuntimeException('Failed to remove old closures');
+            $ids = $conn->executeQuery($subQuery, compact('nodeId'))->fetchAll(\PDO::FETCH_COLUMN);
+            if ($ids) {            
+                // using subquery directly, sqlite acts unfriendly
+                $query = "DELETE FROM {$table} WHERE id IN (".implode(', ', $ids).")";
+                if (!empty($ids) && !$conn->executeQuery($query)) {
+                    throw new RuntimeException('Failed to remove old closures');
+                }
             }
         }
 

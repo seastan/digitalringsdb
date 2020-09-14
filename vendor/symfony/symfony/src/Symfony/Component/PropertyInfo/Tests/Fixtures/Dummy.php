@@ -19,14 +19,14 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class Dummy extends ParentDummy
 {
     /**
-     * @var string This is bar.
+     * @var string This is bar
      */
     private $bar;
 
     /**
      * Should be used.
      *
-     * @var int Should be ignored.
+     * @var int Should be ignored
      */
     protected $baz;
 
@@ -47,9 +47,51 @@ class Dummy extends ParentDummy
     public $collection;
 
     /**
+     * @var string[][]
+     */
+    public $nestedCollection;
+
+    /**
+     * @var mixed[]
+     */
+    public $mixedCollection;
+
+    /**
      * @var ParentDummy
      */
     public $B;
+
+    /**
+     * @var int
+     */
+    protected $Id;
+
+    /**
+     * @var string
+     */
+    public $Guid;
+
+    /**
+     * Nullable array.
+     *
+     * @var array|null
+     */
+    public $g;
+
+    public static function getStatic()
+    {
+    }
+
+    /**
+     * @return string
+     */
+    public static function staticGetter()
+    {
+    }
+
+    public static function staticSetter(\DateTime $d)
+    {
+    }
 
     /**
      * A.
@@ -75,6 +117,17 @@ class Dummy extends ParentDummy
      * @return \DateTime
      */
     public function getDOB()
+    {
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+    }
+
+    public function get123()
     {
     }
 }

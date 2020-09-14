@@ -12,8 +12,8 @@
 namespace Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory;
 
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
-use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -55,6 +55,7 @@ class SimpleFormFactory extends FormLoginFactory
             ->replaceArgument(0, new Reference($config['authenticator']))
             ->replaceArgument(1, new Reference($userProviderId))
             ->replaceArgument(2, $id)
+            ->replaceArgument(3, new Reference('security.user_checker.'.$id))
         ;
 
         return $provider;
@@ -76,18 +77,5 @@ class SimpleFormFactory extends FormLoginFactory
         $listener->addArgument(new Reference($config['authenticator']));
 
         return $listenerId;
-    }
-
-    protected function createEntryPoint($container, $id, $config, $defaultEntryPoint)
-    {
-        $entryPointId = 'security.authentication.form_entry_point.'.$id;
-        $container
-            ->setDefinition($entryPointId, new DefinitionDecorator('security.authentication.form_entry_point'))
-            ->addArgument(new Reference('security.http_utils'))
-            ->addArgument($config['login_path'])
-            ->addArgument($config['use_forward'])
-        ;
-
-        return $entryPointId;
     }
 }

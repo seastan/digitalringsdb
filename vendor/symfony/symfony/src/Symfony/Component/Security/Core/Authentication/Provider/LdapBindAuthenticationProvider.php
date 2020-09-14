@@ -11,14 +11,14 @@
 
 namespace Symfony\Component\Security\Core\Authentication\Provider;
 
+use Symfony\Component\Ldap\Exception\ConnectionException;
+use Symfony\Component\Ldap\LdapClientInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Ldap\LdapClientInterface;
-use Symfony\Component\Ldap\Exception\ConnectionException;
 
 /**
  * LdapBindAuthenticationProvider authenticates a user against an LDAP server.
@@ -35,8 +35,6 @@ class LdapBindAuthenticationProvider extends UserAuthenticationProvider
     private $dnString;
 
     /**
-     * Constructor.
-     *
      * @param UserProviderInterface $userProvider               A UserProvider
      * @param UserCheckerInterface  $userChecker                A UserChecker
      * @param string                $providerKey                The provider key
@@ -72,6 +70,10 @@ class LdapBindAuthenticationProvider extends UserAuthenticationProvider
     {
         $username = $token->getUsername();
         $password = $token->getCredentials();
+
+        if ('' === (string) $password) {
+            throw new BadCredentialsException('The presented password must not be empty.');
+        }
 
         try {
             $username = $this->ldap->escape($username, '', LDAP_ESCAPE_DN);

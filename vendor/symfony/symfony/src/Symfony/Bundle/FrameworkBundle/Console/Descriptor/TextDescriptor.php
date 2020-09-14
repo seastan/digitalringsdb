@@ -55,8 +55,8 @@ class TextDescriptor extends Descriptor
                 $controller = $route->getDefault('_controller');
                 if ($controller instanceof \Closure) {
                     $controller = 'Closure';
-                } elseif (is_object($controller)) {
-                    $controller = get_class($controller);
+                } elseif (\is_object($controller)) {
+                    $controller = \get_class($controller);
                 }
                 $row[] = $controller;
             }
@@ -91,7 +91,7 @@ class TextDescriptor extends Descriptor
             array('Scheme', ($route->getSchemes() ? implode('|', $route->getSchemes()) : 'ANY')),
             array('Method', ($route->getMethods() ? implode('|', $route->getMethods()) : 'ANY')),
             array('Requirements', ($requirements ? $this->formatRouterConfig($requirements) : 'NO CUSTOM')),
-            array('Class', get_class($route)),
+            array('Class', \get_class($route)),
             array('Defaults', $this->formatRouterConfig($route->getDefaults())),
             array('Options', $this->formatRouterConfig($route->getOptions())),
         );
@@ -154,7 +154,7 @@ class TextDescriptor extends Descriptor
             $options['output']->table(
                 array('Service ID', 'Class'),
                 array(
-                    array(isset($options['id']) ? $options['id'] : '-', get_class($service)),
+                    array(isset($options['id']) ? $options['id'] : '-', \get_class($service)),
                 )
             );
         }
@@ -196,10 +196,10 @@ class TextDescriptor extends Descriptor
                     foreach ($tags as $tag) {
                         foreach ($tag as $key => $value) {
                             if (!isset($maxTags[$key])) {
-                                $maxTags[$key] = strlen($key);
+                                $maxTags[$key] = \strlen($key);
                             }
-                            if (strlen($value) > $maxTags[$key]) {
-                                $maxTags[$key] = strlen($value);
+                            if (\strlen($value) > $maxTags[$key]) {
+                                $maxTags[$key] = \strlen($value);
                             }
                         }
                     }
@@ -207,7 +207,7 @@ class TextDescriptor extends Descriptor
             }
         }
 
-        $tagsCount = count($maxTags);
+        $tagsCount = \count($maxTags);
         $tagsNames = array_keys($maxTags);
 
         $tableHeaders = array_merge(array('Service ID'), $tagsNames, array('Class name'));
@@ -234,8 +234,7 @@ class TextDescriptor extends Descriptor
                 $alias = $definition;
                 $tableRows[] = array_merge(array($serviceId, sprintf('alias for "%s"', $alias)), $tagsCount ? array_fill(0, $tagsCount, '') : array());
             } else {
-                // we have no information (happens with "service_container")
-                $tableRows[] = array_merge(array($serviceId, get_class($definition)), $tagsCount ? array_fill(0, $tagsCount, '') : array());
+                $tableRows[] = array_merge(array($serviceId, \get_class($definition)), $tagsCount ? array_fill(0, $tagsCount, '') : array());
             }
         }
 
@@ -256,8 +255,7 @@ class TextDescriptor extends Descriptor
         $tableRows[] = array('Service ID', isset($options['id']) ? $options['id'] : '-');
         $tableRows[] = array('Class', $definition->getClass() ?: '-');
 
-        $tags = $definition->getTags();
-        if (count($tags)) {
+        if ($tags = $definition->getTags()) {
             $tagInformation = '';
             foreach ($tags as $tagName => $tagData) {
                 foreach ($tagData as $tagParameters) {
@@ -282,24 +280,12 @@ class TextDescriptor extends Descriptor
         $tableRows[] = array('Public', $definition->isPublic() ? 'yes' : 'no');
         $tableRows[] = array('Synthetic', $definition->isSynthetic() ? 'yes' : 'no');
         $tableRows[] = array('Lazy', $definition->isLazy() ? 'yes' : 'no');
-
-        if (method_exists($definition, 'isSynchronized')) {
-            $tableRows[] = array('Synchronized', $definition->isSynchronized(false) ? 'yes' : 'no');
-        }
+        $tableRows[] = array('Synchronized', $definition->isSynchronized(false) ? 'yes' : 'no');
         $tableRows[] = array('Abstract', $definition->isAbstract() ? 'yes' : 'no');
+        $tableRows[] = array('Autowired', $definition->isAutowired() ? 'yes' : 'no');
 
-        if (method_exists($definition, 'isAutowired')) {
-            $tableRows[] = array('Autowired', $definition->isAutowired() ? 'yes' : 'no');
-
-            $autowiringTypes = $definition->getAutowiringTypes();
-            if (count($autowiringTypes)) {
-                $autowiringTypesInformation = implode(', ', $autowiringTypes);
-            } else {
-                $autowiringTypesInformation = '-';
-            }
-
-            $tableRows[] = array('Autowiring Types', $autowiringTypesInformation);
-        }
+        $autowiringTypes = $definition->getAutowiringTypes();
+        $tableRows[] = array('Autowiring Types', $autowiringTypes ? implode(', ', $autowiringTypes) : '-');
 
         if ($definition->getFile()) {
             $tableRows[] = array('Required File', $definition->getFile() ? $definition->getFile() : '-');
@@ -318,7 +304,7 @@ class TextDescriptor extends Descriptor
         }
 
         if ($factory = $definition->getFactory()) {
-            if (is_array($factory)) {
+            if (\is_array($factory)) {
                 if ($factory[0] instanceof Reference) {
                     $tableRows[] = array('Factory Service', $factory[0]);
                 } elseif ($factory[0] instanceof Definition) {
@@ -340,7 +326,7 @@ class TextDescriptor extends Descriptor
      */
     protected function describeContainerAlias(Alias $alias, array $options = array())
     {
-        $options['output']->comment(sprintf("This service is an alias for the service <info>%s</info>\n", (string) $alias));
+        $options['output']->comment(sprintf('This service is an alias for the service <info>%s</info>', (string) $alias));
     }
 
     /**
@@ -391,9 +377,6 @@ class TextDescriptor extends Descriptor
         $this->writeText($this->formatCallable($callable), $options);
     }
 
-    /**
-     * @param array $array
-     */
     private function renderEventListenerTable(EventDispatcherInterface $eventDispatcher, $event, array $eventListeners, SymfonyStyle $io)
     {
         $tableHeaders = array('Order', 'Callable', 'Priority');
@@ -435,15 +418,15 @@ class TextDescriptor extends Descriptor
      */
     private function formatCallable($callable)
     {
-        if (is_array($callable)) {
-            if (is_object($callable[0])) {
-                return sprintf('%s::%s()', get_class($callable[0]), $callable[1]);
+        if (\is_array($callable)) {
+            if (\is_object($callable[0])) {
+                return sprintf('%s::%s()', \get_class($callable[0]), $callable[1]);
             }
 
             return sprintf('%s::%s()', $callable[0], $callable[1]);
         }
 
-        if (is_string($callable)) {
+        if (\is_string($callable)) {
             return sprintf('%s()', $callable);
         }
 
@@ -452,7 +435,7 @@ class TextDescriptor extends Descriptor
         }
 
         if (method_exists($callable, '__invoke')) {
-            return sprintf('%s::__invoke()', get_class($callable));
+            return sprintf('%s::__invoke()', \get_class($callable));
         }
 
         throw new \InvalidArgumentException('Callable is not describable.');

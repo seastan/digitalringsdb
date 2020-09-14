@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Command;
 
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -111,13 +110,16 @@ EOT
         $rows = array();
         $copyUsed = false;
         $exitCode = 0;
+        $validAssetDirs = array();
         /** @var BundleInterface $bundle */
         foreach ($this->getContainer()->get('kernel')->getBundles() as $bundle) {
             if (!is_dir($originDir = $bundle->getPath().'/Resources/public')) {
                 continue;
             }
 
-            $targetDir = $bundlesDir.preg_replace('/bundle$/', '', strtolower($bundle->getName()));
+            $assetDir = preg_replace('/bundle$/', '', strtolower($bundle->getName()));
+            $targetDir = $bundlesDir.$assetDir;
+            $validAssetDirs[] = $assetDir;
 
             if (OutputInterface::VERBOSITY_VERBOSE <= $output->getVerbosity()) {
                 $message = sprintf("%s\n-> %s", $bundle->getName(), $targetDir);
@@ -141,15 +143,18 @@ EOT
                 }
 
                 if ($method === $expectedMethod) {
-                    $rows[] = array(sprintf('<fg=green;options=bold>%s</>', '\\' === DIRECTORY_SEPARATOR ? 'OK' : "\xE2\x9C\x94" /* HEAVY CHECK MARK (U+2714) */), $message, $method);
+                    $rows[] = array(sprintf('<fg=green;options=bold>%s</>', '\\' === \DIRECTORY_SEPARATOR ? 'OK' : "\xE2\x9C\x94" /* HEAVY CHECK MARK (U+2714) */), $message, $method);
                 } else {
-                    $rows[] = array(sprintf('<fg=yellow;options=bold>%s</>', '\\' === DIRECTORY_SEPARATOR ? 'WARNING' : '!'), $message, $method);
+                    $rows[] = array(sprintf('<fg=yellow;options=bold>%s</>', '\\' === \DIRECTORY_SEPARATOR ? 'WARNING' : '!'), $message, $method);
                 }
             } catch (\Exception $e) {
                 $exitCode = 1;
-                $rows[] = array(sprintf('<fg=red;options=bold>%s</>', '\\' === DIRECTORY_SEPARATOR ? 'ERROR' : "\xE2\x9C\x98" /* HEAVY BALLOT X (U+2718) */), $message, $e->getMessage());
+                $rows[] = array(sprintf('<fg=red;options=bold>%s</>', '\\' === \DIRECTORY_SEPARATOR ? 'ERROR' : "\xE2\x9C\x98" /* HEAVY BALLOT X (U+2718) */), $message, $e->getMessage());
             }
         }
+        // remove the assets of the bundles that no longer exist
+        $dirsToRemove = Finder::create()->depth(0)->directories()->exclude($validAssetDirs)->in($bundlesDir);
+        $this->filesystem->remove($dirsToRemove);
 
         $io->table(array('', 'Bundle', 'Method / Error'), $rows);
 
@@ -217,12 +222,12 @@ EOT
      * @param string $targetDir
      * @param bool   $relative
      *
-     * @throws IOException If link can not be created.
+     * @throws IOException if link can not be created
      */
     private function symlink($originDir, $targetDir, $relative = false)
     {
         if ($relative) {
-            $originDir = $this->filesystem->makePathRelative($originDir, realpath(dirname($targetDir)));
+            $originDir = $this->filesystem->makePathRelative($originDir, realpath(\dirname($targetDir)));
         }
         $this->filesystem->symlink($originDir, $targetDir);
         if (!file_exists($targetDir)) {

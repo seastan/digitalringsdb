@@ -56,8 +56,6 @@ use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
  * cannot store a context and expect that the methods still return the same
  * results later on.
  *
- * @since  2.5
- *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 interface ExecutionContextInterface extends LegacyExecutionContextInterface
@@ -90,7 +88,7 @@ interface ExecutionContextInterface extends LegacyExecutionContextInterface
      *     {
      *         $validator = $this->context->getValidator();
      *
-     *         $violations = $validator->validateValue($value, new Length(array('min' => 3)));
+     *         $violations = $validator->validate($value, new Length(array('min' => 3)));
      *
      *         if (count($violations) > 0) {
      *             // ...
@@ -111,7 +109,7 @@ interface ExecutionContextInterface extends LegacyExecutionContextInterface
      *
      * In other cases, null is returned.
      *
-     * @return object|null The currently validated object or null.
+     * @return object|null The currently validated object or null
      */
     public function getObject();
 
